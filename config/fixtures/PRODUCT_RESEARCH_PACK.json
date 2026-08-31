@@ -1,0 +1,14 @@
+{
+  "id": "PRODUCT_RESEARCH_PACK",
+  "version": "1.0.0",
+  "kind": "text",
+  "requirements": [
+    "SSO"
+  ],
+  "golden": {
+    "must_appear": [
+      "SSO"
+    ]
+  },
+  "signed_off": true
+}

@@ -1,0 +1,13 @@
+{
+  "id": "CASUAL_GAMER_PROFILE",
+  "version": "1.0.0",
+  "kind": "text",
+  "game": "Stardew Valley",
+  "session_hours": 2,
+  "golden": {
+    "must_appear": [
+      "Stardew"
+    ]
+  },
+  "signed_off": true
+}

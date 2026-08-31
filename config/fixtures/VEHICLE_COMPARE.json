@@ -1,0 +1,33 @@
+{
+  "id": "VEHICLE_COMPARE",
+  "version": "1.0.0",
+  "kind": "catalog",
+  "items": [
+    {
+      "id": "V1",
+      "type": "sedan",
+      "awd": false,
+      "price": 31000,
+      "winter": "poor"
+    },
+    {
+      "id": "V2",
+      "type": "crossover",
+      "awd": true,
+      "price": 27500,
+      "winter": "good",
+      "range_mi": 280
+    },
+    {
+      "id": "V3",
+      "type": "ev",
+      "awd": true,
+      "price": 42000,
+      "winter": "ok"
+    }
+  ],
+  "golden": {
+    "winner": "V2"
+  },
+  "signed_off": true
+}

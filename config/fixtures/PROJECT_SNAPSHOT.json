@@ -1,0 +1,13 @@
+{
+  "id": "PROJECT_SNAPSHOT",
+  "version": "1.0.0",
+  "kind": "text",
+  "status_hint": "amber",
+  "blocker": "API delay",
+  "golden": {
+    "must_appear": [
+      "API"
+    ]
+  },
+  "signed_off": true
+}

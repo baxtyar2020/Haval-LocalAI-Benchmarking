@@ -1,0 +1,15 @@
+{
+  "id": "CASE_HISTORY",
+  "version": "1.0.0",
+  "kind": "logs",
+  "events": [
+    {
+      "code": "firmware_0x17",
+      "text": "matrix fault after liquid, firmware < 1.4.2"
+    }
+  ],
+  "golden": {
+    "root_cause": "firmware_0x17"
+  },
+  "signed_off": true
+}

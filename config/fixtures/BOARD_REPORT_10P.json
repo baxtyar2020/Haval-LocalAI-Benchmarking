@@ -1,0 +1,26 @@
+{
+  "id": "BOARD_REPORT_10P",
+  "version": "1.0.0",
+  "kind": "text",
+  "pages": [
+    "Board section 1.",
+    "Board section 2.",
+    "Board section 3.",
+    "Board section 4.",
+    "Board section 5.",
+    "Board section 6.",
+    "Board section 7.",
+    "Board section 8.",
+    "Board section 9.",
+    "Board section 10."
+  ],
+  "risks": [
+    "supply concentration"
+  ],
+  "golden": {
+    "must_appear": [
+      "supply concentration"
+    ]
+  },
+  "signed_off": true
+}

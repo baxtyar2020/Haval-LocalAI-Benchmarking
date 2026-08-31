@@ -1,0 +1,91 @@
+{
+  "version": "3.3.2",
+  "labels": {
+    "excellent": 88,
+    "strong": 75,
+    "acceptable": 62,
+    "marginal": 48
+  },
+  "speed_ok_multiple": 2.0,
+  "speed_points": {
+    "Fast": 100,
+    "OK": 75,
+    "Slow": 40
+  },
+  "phase1_weights": {
+    "content": 0.70,
+    "speed": 0.15,
+    "consistency": 0.10,
+    "sustainability": 0.05
+  },
+  "combine_weights": {
+    "phase1": 0.50,
+    "phase2": 0.50
+  },
+  "critical_weight": 25,
+  "label_floors": {
+    "Excellent": 75,
+    "Strong": 62,
+    "Acceptable": 48,
+    "Marginal Match": 30
+  },
+  "sustainability_unknown": 50,
+  "havalllmphase2_quality_weights": {
+    "reasoning": 20,
+    "coding": 20,
+    "instructionFollowing": 20,
+    "structuredOutput": 15,
+    "math": 15
+  },
+  "havalllmphase2_time_limits_ms": {
+    "reasoning": 120000,
+    "math": 120000,
+    "instructionFollowing": 30000,
+    "structuredOutput": 120000,
+    "coding": 240000
+  },
+  "persona_phase2": {
+    "Everyday Organizer": {"reasoning": 16, "coding": 0, "instructionFollowing": 45, "structuredOutput": 38, "math": 1},
+    "Student & Learner": {"reasoning": 26, "coding": 0, "instructionFollowing": 42, "structuredOutput": 32, "math": 0},
+    "Family Coordinator": {"reasoning": 17, "coding": 0, "instructionFollowing": 47, "structuredOutput": 35, "math": 1},
+    "Researcher & Shopper": {"reasoning": 20, "coding": 0, "instructionFollowing": 39, "structuredOutput": 39, "math": 2},
+    "Writer & Communicator": {"reasoning": 20, "coding": 0, "instructionFollowing": 50, "structuredOutput": 30, "math": 0},
+    "Creative Prosumer": {"reasoning": 20, "coding": 0, "instructionFollowing": 45, "structuredOutput": 35, "math": 0},
+    "Personal Adviser": {"reasoning": 26, "coding": 0, "instructionFollowing": 39, "structuredOutput": 22, "math": 13},
+    "Technical Hobbyist": {"reasoning": 25, "coding": 31, "instructionFollowing": 25, "structuredOutput": 18, "math": 1},
+    "Casual Gamer": {"reasoning": 20, "coding": 0, "instructionFollowing": 50, "structuredOutput": 30, "math": 0},
+    "Power Player": {"reasoning": 25, "coding": 0, "instructionFollowing": 30, "structuredOutput": 30, "math": 15},
+    "Progressive Creator": {"reasoning": 22, "coding": 0, "instructionFollowing": 43, "structuredOutput": 35, "math": 0},
+    "Rising Game Developer": {"reasoning": 22, "coding": 29, "instructionFollowing": 22, "structuredOutput": 16, "math": 11},
+    "Executive & Decision Maker": {"reasoning": 29, "coding": 0, "instructionFollowing": 34, "structuredOutput": 29, "math": 8},
+    "Project & Operations Manager": {"reasoning": 20, "coding": 0, "instructionFollowing": 32, "structuredOutput": 36, "math": 12},
+    "Engineer & Software Developer": {"reasoning": 23, "coding": 30, "instructionFollowing": 19, "structuredOutput": 16, "math": 12},
+    "Analyst & Finance Professional": {"reasoning": 21, "coding": 0, "instructionFollowing": 33, "structuredOutput": 25, "math": 21},
+    "Research & Product Professional": {"reasoning": 24, "coding": 0, "instructionFollowing": 28, "structuredOutput": 27, "math": 21},
+    "Sales & Marketing Professional": {"reasoning": 22, "coding": 0, "instructionFollowing": 32, "structuredOutput": 25, "math": 21},
+    "Customer Support Specialist": {"reasoning": 22, "coding": 0, "instructionFollowing": 37, "structuredOutput": 30, "math": 11},
+    "People, Legal & Compliance Professional": {"reasoning": 34, "coding": 0, "instructionFollowing": 38, "structuredOutput": 28, "math": 0}
+  },
+  "persona_phase2_floors": {
+    "Everyday Organizer": {"reasoning": 15, "coding": 0, "instructionFollowing": 40, "structuredOutput": 35, "math": 1},
+    "Student & Learner": {"reasoning": 25, "coding": 0, "instructionFollowing": 40, "structuredOutput": 30, "math": 0},
+    "Family Coordinator": {"reasoning": 15, "coding": 0, "instructionFollowing": 40, "structuredOutput": 30, "math": 1},
+    "Researcher & Shopper": {"reasoning": 20, "coding": 0, "instructionFollowing": 40, "structuredOutput": 40, "math": 2},
+    "Writer & Communicator": {"reasoning": 20, "coding": 0, "instructionFollowing": 50, "structuredOutput": 30, "math": 0},
+    "Creative Prosumer": {"reasoning": 20, "coding": 0, "instructionFollowing": 45, "structuredOutput": 35, "math": 0},
+    "Personal Adviser": {"reasoning": 30, "coding": 0, "instructionFollowing": 45, "structuredOutput": 25, "math": 15},
+    "Technical Hobbyist": {"reasoning": 35, "coding": 45, "instructionFollowing": 35, "structuredOutput": 25, "math": 1},
+    "Casual Gamer": {"reasoning": 10, "coding": 0, "instructionFollowing": 25, "structuredOutput": 15, "math": 0},
+    "Power Player": {"reasoning": 25, "coding": 0, "instructionFollowing": 30, "structuredOutput": 30, "math": 15},
+    "Progressive Creator": {"reasoning": 25, "coding": 0, "instructionFollowing": 50, "structuredOutput": 40, "math": 0},
+    "Rising Game Developer": {"reasoning": 40, "coding": 55, "instructionFollowing": 40, "structuredOutput": 30, "math": 20},
+    "Executive & Decision Maker": {"reasoning": 35, "coding": 0, "instructionFollowing": 40, "structuredOutput": 35, "math": 10},
+    "Project & Operations Manager": {"reasoning": 25, "coding": 0, "instructionFollowing": 40, "structuredOutput": 45, "math": 15},
+    "Engineer & Software Developer": {"reasoning": 50, "coding": 65, "instructionFollowing": 40, "structuredOutput": 35, "math": 25},
+    "Analyst & Finance Professional": {"reasoning": 30, "coding": 0, "instructionFollowing": 45, "structuredOutput": 35, "math": 30},
+    "Research & Product Professional": {"reasoning": 35, "coding": 0, "instructionFollowing": 40, "structuredOutput": 40, "math": 30},
+    "Sales & Marketing Professional": {"reasoning": 30, "coding": 0, "instructionFollowing": 45, "structuredOutput": 35, "math": 30},
+    "Customer Support Specialist": {"reasoning": 30, "coding": 0, "instructionFollowing": 50, "structuredOutput": 40, "math": 15},
+    "People, Legal & Compliance Professional": {"reasoning": 50, "coding": 0, "instructionFollowing": 55, "structuredOutput": 40, "math": 0}
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "KB_KEYBOARD",
+  "version": "1.0.0",
+  "kind": "text",
+  "path": [
+    "power off",
+    "invert",
+    "wait 48h",
+    "RMA if sticky"
+  ],
+  "golden": {
+    "must_appear": [
+      "RMA",
+      "invert"
+    ]
+  },
+  "signed_off": true
+}

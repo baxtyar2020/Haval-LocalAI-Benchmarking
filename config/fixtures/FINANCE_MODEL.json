@@ -1,0 +1,28 @@
+{
+  "id": "FINANCE_MODEL",
+  "version": "1.0.0",
+  "kind": "finance",
+  "p_and_l": {
+    "revenue": 2000,
+    "cogs": 1100,
+    "opex": 480
+  },
+  "quarters": [
+    {
+      "rev": 1000
+    },
+    {
+      "rev": 1100
+    }
+  ],
+  "regions": {
+    "North": 600,
+    "West": 400
+  },
+  "golden": {
+    "net": 420,
+    "qoq_growth_pct": 10.0,
+    "best_region": "North"
+  },
+  "signed_off": true
+}

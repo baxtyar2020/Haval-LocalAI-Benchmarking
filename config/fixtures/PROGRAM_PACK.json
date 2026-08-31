@@ -1,0 +1,16 @@
+{
+  "id": "PROGRAM_PACK",
+  "version": "1.0.0",
+  "kind": "text",
+  "dependency": "billing before launch",
+  "owners": [
+    "Ava",
+    "Ben"
+  ],
+  "golden": {
+    "must_appear": [
+      "billing before launch"
+    ]
+  },
+  "signed_off": true
+}

@@ -1,0 +1,20 @@
+{
+  "id": "APPLICATION_DRAFT",
+  "version": "1.0.0",
+  "kind": "text",
+  "true_facts": [
+    "interned at Harbor Lab",
+    "GPA 3.6"
+  ],
+  "false_traps": [
+    "Rhodes Scholarship"
+  ],
+  "body": "I interned at Harbor Lab last summer. My GPA is 3.6. I hope to study biology.",
+  "golden": {
+    "must_appear": [
+      "Harbor Lab",
+      "3.6"
+    ]
+  },
+  "signed_off": true
+}

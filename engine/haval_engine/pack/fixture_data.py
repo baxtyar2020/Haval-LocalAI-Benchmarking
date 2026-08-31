@@ -1,0 +1,338 @@
+"""Write versioned fixtures with deterministic goldens."""
+
+from __future__ import annotations
+
+import json
+
+from haval_engine.pack.paths import fixtures_dir
+
+
+def fixtures() -> dict[str, dict]:
+    pages = [
+        "Cells convert chemical energy in glucose into ATP, the energy currency of the cell.",
+        "Glycolysis happens in the cytoplasm and does not require oxygen. It yields pyruvate and a little ATP.",
+        "Pyruvate enters mitochondria when oxygen is present.",
+        "The Krebs cycle (citric acid cycle) in the mitochondrial matrix produces NADH and FADH2.",
+        "The electron transport chain sits on the inner mitochondrial membrane.",
+        "Oxygen is the final electron acceptor; water is formed.",
+        "Most ATP is made by oxidative phosphorylation in mitochondria.",
+        "Photosynthesis is a different pathway in chloroplasts and is not the focus of this chapter.",
+        "A common mistake is claiming glycolysis requires oxygen.",
+        "Practice: name ATP, mitochondria, glycolysis, Krebs, and oxygen as the acceptor.",
+    ]
+    data = {
+        "WEEK_PLAN": {
+            "id": "WEEK_PLAN",
+            "version": "1.0.0",
+            "kind": "schedule",
+            "work_hours": "09:00-17:00 Mon-Fri",
+            "events": [
+                {"day": "Tue", "start": "15:00", "end": "16:00", "title": "Dentist"},
+                {"day": "Thu", "start": "17:00", "end": "18:30", "title": "Soccer"},
+                {"day": "Sat", "start": "09:00", "end": "10:30", "title": "Grocery"},
+            ],
+            "golden": {"conflicts_after_fix": 0, "must_include": ["Dentist", "Soccer"]},
+            "signed_off": True,
+        },
+        "CELL_ENERGY_10P": {
+            "id": "CELL_ENERGY_10P",
+            "version": "1.0.0",
+            "kind": "text",
+            "pages": pages,
+            "golden": {"must_appear": ["ATP", "mitochondria", "glycolysis"], "quiz_keys": ["ATP", "mitochondria", "glycolysis"]},
+            "signed_off": True,
+        },
+        "FAMILY_WEEK": {
+            "id": "FAMILY_WEEK",
+            "version": "1.0.0",
+            "kind": "text",
+            "pickup": "15:30",
+            "budget_cap": 180,
+            "allergy": "peanuts",
+            "school": ["Mon-Fri class"],
+            "golden": {"must_appear": ["15:30", "peanuts"]},
+            "signed_off": True,
+        },
+        "FAMILY_MONTH": {
+            "id": "FAMILY_MONTH",
+            "version": "1.0.0",
+            "kind": "text",
+            "monthly_budget": 1200,
+            "exam_week": 3,
+            "term_dates": "2026-09-01 to 2026-12-18",
+            "golden": {"must_appear": ["1200", "exam"]},
+            "signed_off": True,
+        },
+        "LAPTOP_5": {
+            "id": "LAPTOP_5",
+            "version": "1.0.0",
+            "kind": "catalog",
+            "items": [
+                {"id": "L1", "ram_gb": 8, "ssd_gb": 256, "price": 599},
+                {"id": "L2", "ram_gb": 16, "ssd_gb": 512, "price": 1299},
+                {"id": "L3", "ram_gb": 16, "ssd_gb": 512, "price": 949},
+                {"id": "L4", "ram_gb": 32, "ssd_gb": 1024, "price": 1899},
+                {"id": "L5", "ram_gb": 16, "ssd_gb": 256, "price": 879},
+            ],
+            "golden": {"winner": "L3"},
+            "signed_off": True,
+        },
+        "VEHICLE_COMPARE": {
+            "id": "VEHICLE_COMPARE",
+            "version": "1.0.0",
+            "kind": "catalog",
+            "items": [
+                {"id": "V1", "type": "sedan", "awd": False, "price": 31000, "winter": "poor"},
+                {"id": "V2", "type": "crossover", "awd": True, "price": 27500, "winter": "good", "range_mi": 280},
+                {"id": "V3", "type": "ev", "awd": True, "price": 42000, "winter": "ok"},
+            ],
+            "golden": {"winner": "V2"},
+            "signed_off": True,
+        },
+        "APPLICATION_DRAFT": {
+            "id": "APPLICATION_DRAFT",
+            "version": "1.0.0",
+            "kind": "text",
+            "true_facts": ["interned at Harbor Lab", "GPA 3.6"],
+            "false_traps": ["Rhodes Scholarship"],
+            "body": "I interned at Harbor Lab last summer. My GPA is 3.6. I hope to study biology.",
+            "golden": {"must_appear": ["Harbor Lab", "3.6"]},
+            "signed_off": True,
+        },
+        "CREATOR_BRIEF": {
+            "id": "CREATOR_BRIEF",
+            "version": "1.0.0",
+            "kind": "text",
+            "product": "desk lamp",
+            "audience": "new homeowners",
+            "tone": "warm practical",
+            "golden": {"must_appear": ["lamp", "homeowner"]},
+            "signed_off": True,
+        },
+        "RELOCATION_CASE": {
+            "id": "RELOCATION_CASE",
+            "version": "1.0.0",
+            "kind": "text",
+            "budget": 4500,
+            "job": "remote",
+            "commute_alt": "4 miles",
+            "golden": {"must_appear": ["4500", "remote"]},
+            "signed_off": True,
+        },
+        "PC_DIAGNOSTIC": {
+            "id": "PC_DIAGNOSTIC",
+            "version": "1.0.0",
+            "kind": "logs",
+            "events": [
+                {"code": "failing_ssd", "text": "Event 7 disk error, SMART reallocated sectors rising"},
+                {"code": "boot_loop", "text": "Unexpected restart during Windows load"},
+            ],
+            "golden": {"root_cause": "failing_ssd"},
+            "signed_off": True,
+        },
+        "CASUAL_GAMER_PROFILE": {
+            "id": "CASUAL_GAMER_PROFILE",
+            "version": "1.0.0",
+            "kind": "text",
+            "game": "Stardew Valley",
+            "session_hours": 2,
+            "golden": {"must_appear": ["Stardew"]},
+            "signed_off": True,
+        },
+        "GAME_CATALOG": {
+            "id": "GAME_CATALOG",
+            "version": "1.0.0",
+            "kind": "catalog",
+            "items": [
+                {"id": "G1", "name": "Stardew Valley", "session": 1},
+                {"id": "G2", "name": "Cozy Farm Lite", "session": 1.5},
+                {"id": "G3", "name": "MMO grind", "session": 8},
+                {"id": "G4", "name": "Local co-op party", "session": 2},
+            ],
+            "golden": {"winner": "G2"},
+            "signed_off": True,
+        },
+        "GAME_BENCH_LOGS": {
+            "id": "GAME_BENCH_LOGS",
+            "version": "1.0.0",
+            "kind": "logs",
+            "events": [
+                {"code": "gpu_thermals", "text": "GPU 87C, clocks drop after 20 min"},
+                {"code": "cpu_ok", "text": "CPU 4% idle wait, not bound"},
+            ],
+            "golden": {"root_cause": "gpu_thermals"},
+            "signed_off": True,
+        },
+        "GAMEPLAY_TRANSCRIPT": {
+            "id": "GAMEPLAY_TRANSCRIPT",
+            "version": "1.0.0",
+            "kind": "text",
+            "score": "16-14",
+            "lines": ["pistol round loss", "eco round", "clutch site B", "match closes 16-14"],
+            "golden": {"must_appear": ["16-14"]},
+            "signed_off": True,
+        },
+        "CHANNEL_BRIEF": {
+            "id": "CHANNEL_BRIEF",
+            "version": "1.0.0",
+            "kind": "text",
+            "tone": "helpful",
+            "rating": "PG",
+            "golden": {"must_appear": ["helpful"]},
+            "signed_off": True,
+        },
+        "QUARTER_UPDATE": {
+            "id": "QUARTER_UPDATE",
+            "version": "1.0.0",
+            "kind": "text",
+            "revenue_m": 12.4,
+            "risk": "delayed vendor",
+            "ask": "QA headcount",
+            "golden": {"must_appear": ["12.4", "QA"]},
+            "signed_off": True,
+        },
+        "BOARD_REPORT_10P": {
+            "id": "BOARD_REPORT_10P",
+            "version": "1.0.0",
+            "kind": "text",
+            "pages": [f"Board section {i}." for i in range(1, 11)],
+            "risks": ["supply concentration"],
+            "golden": {"must_appear": ["supply concentration"]},
+            "signed_off": True,
+        },
+        "PROJECT_SNAPSHOT": {
+            "id": "PROJECT_SNAPSHOT",
+            "version": "1.0.0",
+            "kind": "text",
+            "status_hint": "amber",
+            "blocker": "API delay",
+            "golden": {"must_appear": ["API"]},
+            "signed_off": True,
+        },
+        "PROGRAM_PACK": {
+            "id": "PROGRAM_PACK",
+            "version": "1.0.0",
+            "kind": "text",
+            "dependency": "billing before launch",
+            "owners": ["Ava", "Ben"],
+            "golden": {"must_appear": ["billing before launch"]},
+            "signed_off": True,
+        },
+        "FINANCE_MODEL": {
+            "id": "FINANCE_MODEL",
+            "version": "1.0.0",
+            "kind": "finance",
+            "p_and_l": {"revenue": 2000, "cogs": 1100, "opex": 480},
+            "quarters": [{"rev": 1000}, {"rev": 1100}],
+            "regions": {"North": 600, "West": 400},
+            "golden": {"net": 420, "qoq_growth_pct": 10.0, "best_region": "North"},
+            "signed_off": True,
+        },
+        "COMPETITOR_TABLE": {
+            "id": "COMPETITOR_TABLE",
+            "version": "1.0.0",
+            "kind": "catalog",
+            "items": [
+                {"id": "Acme", "sso": True},
+                {"id": "Rival", "sso": True},
+            ],
+            "quotes": ["We would pay for SSO"],
+            "golden": {"winner": "Acme"},
+            "signed_off": True,
+        },
+        "PRODUCT_RESEARCH_PACK": {
+            "id": "PRODUCT_RESEARCH_PACK",
+            "version": "1.0.0",
+            "kind": "text",
+            "requirements": ["SSO"],
+            "golden": {"must_appear": ["SSO"]},
+            "signed_off": True,
+        },
+        "ACCOUNT_PACK": {
+            "id": "ACCOUNT_PACK",
+            "version": "1.0.0",
+            "kind": "text",
+            "account": "Northwind",
+            "news": "warehouse expansion",
+            "golden": {"must_appear": ["Northwind", "warehouse"]},
+            "signed_off": True,
+        },
+        "APPROVED_CLAIMS": {
+            "id": "APPROVED_CLAIMS",
+            "version": "1.0.0",
+            "kind": "text",
+            "claims": ["slip-resistance"],
+            "golden": {"must_appear": ["slip-resistance"]},
+            "signed_off": True,
+        },
+        "KB_KEYBOARD": {
+            "id": "KB_KEYBOARD",
+            "version": "1.0.0",
+            "kind": "text",
+            "path": ["power off", "invert", "wait 48h", "RMA if sticky"],
+            "golden": {"must_appear": ["RMA", "invert"]},
+            "signed_off": True,
+        },
+        "CASE_HISTORY": {
+            "id": "CASE_HISTORY",
+            "version": "1.0.0",
+            "kind": "logs",
+            "events": [{"code": "firmware_0x17", "text": "matrix fault after liquid, firmware < 1.4.2"}],
+            "golden": {"root_cause": "firmware_0x17"},
+            "signed_off": True,
+        },
+        "DEVICE_LOGS": {
+            "id": "DEVICE_LOGS",
+            "version": "1.0.0",
+            "kind": "logs",
+            "events": [{"code": "firmware_0x17", "text": "HID reset loop"}],
+            "golden": {"root_cause": "firmware_0x17"},
+            "signed_off": True,
+        },
+        "POLICY_2025": {
+            "id": "POLICY_2025",
+            "version": "1.0.0",
+            "kind": "policy_pair",
+            "v1": {"year": 2025, "retention": "3 years"},
+            "v2": {"year": 2026, "retention": "2 years"},
+            "golden": {"retention_from": "3 years", "retention_to": "2 years"},
+            "signed_off": True,
+        },
+        "POLICY_2026": {
+            "id": "POLICY_2026",
+            "version": "1.0.0",
+            "kind": "text",
+            "retention": "2 years",
+            "golden": {"must_appear": ["2 years"]},
+            "signed_off": True,
+        },
+        "CONTRACT_25P": {
+            "id": "CONTRACT_25P",
+            "version": "1.0.0",
+            "kind": "contract",
+            "effective_date": "2026-01-15",
+            "governing_law": "Delaware",
+            "notice_days": 30,
+            "clauses": [{"n": i, "text": f"Placeholder clause {i}."} for i in range(1, 26)],
+            "golden": {
+                "effective_date": "2026-01-15",
+                "audit_clause": 12,
+                "audit_snippet": "audit rights on 10 days notice",
+            },
+            "signed_off": True,
+        },
+    }
+    data["CONTRACT_25P"]["clauses"][11]["text"] = "The Vendor grants audit rights on 10 days notice (clause 12)."
+    data["CONTRACT_25P"]["clauses"][3]["text"] = "Venue is Delaware courts."
+    data["CONTRACT_25P"]["clauses"][18]["text"] = "Venue may also be the supplier home courts."
+    return data
+
+
+def write_fixtures() -> None:
+    dest = fixtures_dir()
+    dest.mkdir(parents=True, exist_ok=True)
+    data = fixtures()
+    for name, body in data.items():
+        (dest / f"{name}.json").write_text(json.dumps(body, indent=2) + "\n", encoding="utf-8")
+    manifest = {"version": "1.0.0", "fixtures": sorted(data)}
+    (dest / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")

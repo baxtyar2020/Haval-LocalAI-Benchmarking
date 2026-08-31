@@ -1,0 +1,14 @@
+{
+  "id": "ACCOUNT_PACK",
+  "version": "1.0.0",
+  "kind": "text",
+  "account": "Northwind",
+  "news": "warehouse expansion",
+  "golden": {
+    "must_appear": [
+      "Northwind",
+      "warehouse"
+    ]
+  },
+  "signed_off": true
+}

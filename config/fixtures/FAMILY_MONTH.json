@@ -1,0 +1,15 @@
+{
+  "id": "FAMILY_MONTH",
+  "version": "1.0.0",
+  "kind": "text",
+  "monthly_budget": 1200,
+  "exam_week": 3,
+  "term_dates": "2026-09-01 to 2026-12-18",
+  "golden": {
+    "must_appear": [
+      "1200",
+      "exam"
+    ]
+  },
+  "signed_off": true
+}

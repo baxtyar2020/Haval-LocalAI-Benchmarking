@@ -1,0 +1,11 @@
+{
+  "bundle": {
+    "resources": {
+      "../../config": "config",
+      "../../engine/haval_engine": "haval_engine",
+      "../../engine/requirements.txt": "requirements.txt",
+      "../../LICENSE": "LICENSE",
+      "../../installer/runtime/python": "python"
+    }
+  }
+}

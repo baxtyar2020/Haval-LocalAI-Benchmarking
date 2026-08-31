@@ -1,0 +1,41 @@
+{
+  "id": "LAPTOP_5",
+  "version": "1.0.0",
+  "kind": "catalog",
+  "items": [
+    {
+      "id": "L1",
+      "ram_gb": 8,
+      "ssd_gb": 256,
+      "price": 599
+    },
+    {
+      "id": "L2",
+      "ram_gb": 16,
+      "ssd_gb": 512,
+      "price": 1299
+    },
+    {
+      "id": "L3",
+      "ram_gb": 16,
+      "ssd_gb": 512,
+      "price": 949
+    },
+    {
+      "id": "L4",
+      "ram_gb": 32,
+      "ssd_gb": 1024,
+      "price": 1899
+    },
+    {
+      "id": "L5",
+      "ram_gb": 16,
+      "ssd_gb": 256,
+      "price": 879
+    }
+  ],
+  "golden": {
+    "winner": "L3"
+  },
+  "signed_off": true
+}

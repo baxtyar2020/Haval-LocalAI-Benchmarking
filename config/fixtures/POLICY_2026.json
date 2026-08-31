@@ -1,0 +1,12 @@
+{
+  "id": "POLICY_2026",
+  "version": "1.0.0",
+  "kind": "text",
+  "retention": "2 years",
+  "golden": {
+    "must_appear": [
+      "2 years"
+    ]
+  },
+  "signed_off": true
+}

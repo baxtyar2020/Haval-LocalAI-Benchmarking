@@ -1,0 +1,2721 @@
+{
+  "version": "1.0.0",
+  "count": 60,
+  "attempts_per_scenario": 1,
+  "scenarios": [
+    {
+      "id": "C-EO-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Everyday Organizer",
+      "intensity": "Light",
+      "name": "Day list that kept the dentist",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "You keep my day list. Do not invent errands.\n\nNOW\n- Thu 6:00pm dentist (keep)\n- Need milk\n- Soccer moved from Sat 9am to Sat 11am\n\nWrite:\n1) Today list, max 6 bullets, time first\n2) One line: what changed\n3) One line I should put on the fridge\n\nHARD LIMIT: 120 words. No preamble. No tips.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "S"
+      ],
+      "weights": {
+        "S": 0.6,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "dentist",
+        "milk",
+        "11am|11:00|11.00"
+      ],
+      "must_not_contain": [
+        "candy"
+      ],
+      "seeds": {
+        "good": "6:00pm dentist\nNeed milk\nSat 11am soccer (was 9am)\nChanged: soccer moved to 11am.\nFridge: dentist Thu 6pm \u2014 do not skip.",
+        "bad": "Skip the dentist and add candy shopping plus a new gym class."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-EO-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Everyday Organizer",
+      "intensity": "Balanced",
+      "name": "Dinner-to-bed, one bathroom",
+      "ttft_s": 8,
+      "total_s": 45,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Plan 5:30\u20137:00pm for two kids, one bathroom, one oven.\n\nCONSTRAINTS\n- Pasta bake needs 25 min in oven\n- Baths cannot overlap\n- Homework 15 min each\n\nOutput a 6-row table: time | who | where | doing.\nIf something does not fit write [WON'T FIT] instead of stretching time.\n\nHARD LIMIT: 180 words. No pep talk.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "S",
+        "R"
+      ],
+      "weights": {
+        "S": 0.3,
+        "R": 0.3,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "pasta",
+        "bath|baths|bathing",
+        "homework|schoolwork"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "5:30 | parent | kitchen | pasta bake in oven\n5:30 | kid A | table | homework 15 min\n5:45 | kid B | table | homework 15 min\n5:55 | kid A | bath | bath\n6:15 | kid B | bath | bath\n6:40 | both | kitchen | dinner\nIf overlap: [WON'T FIT] second bath vs dinner.",
+        "bad": "Everyone baths together at 5:30 and the pasta is done instantly. Add a movie night I did not ask for."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-EO-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Everyday Organizer",
+      "intensity": "Heavy",
+      "name": "Week board from pasted events",
+      "ttft_s": 12,
+      "total_s": 90,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Build a Mon\u2013Sun board from ONLY these events:\n- Mon 8am school\n- Wed 4pm dentist (kid A)\n- Sat 11am soccer\n- Sun 2pm grandparents\n\nColumns: day | must | flexible | note.\nDo not add chores I did not list.\nMark conflicts [CONFLICT].\n\nHARD LIMIT: 280 words. One table.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "S",
+        "R",
+        "F"
+      ],
+      "weights": {
+        "S": 0.2,
+        "R": 0.2,
+        "F": 0.2,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "school",
+        "dentist",
+        "soccer",
+        "grandparents|grandparent|grandma|grandpa"
+      ],
+      "must_not_contain": [
+        "paris",
+        "flight"
+      ],
+      "seeds": {
+        "good": "Mon | school 8am | | \nWed | dentist kid A 4pm | |\nSat | soccer 11am | |\nSun | grandparents 2pm | |\nNo extra chores. [CONFLICT] none among these four.",
+        "bad": "Thu flight to Paris plus invented laundry every night."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-SL-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Student & Learner",
+      "intensity": "Light",
+      "name": "Five bullets from the paragraph",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Explain ONLY the paragraph I paste. Do not add outside facts.\n\nPARAGRAPH\nPhotosynthesis is how green plants make food. They take in carbon dioxide from air and water from roots. Sunlight hitting chlorophyll drives a reaction that builds glucose. Oxygen is released as a byproduct. The glucose stores chemical energy the plant can use later.\n\nWrite:\n1) 5 bullets, plain words\n2) 1 sentence I would write in the margin\n3) 1 word I should look up \u2014 only if it is in the paragraph\n\nHARD LIMIT: 160 words. No preamble.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "R",
+        "I"
+      ],
+      "weights": {
+        "R": 0.3,
+        "I": 0.3,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "sunlight|sun light",
+        "glucose",
+        "carbon dioxide|co2"
+      ],
+      "must_not_contain": [
+        "nuclear fission"
+      ],
+      "seeds": {
+        "good": "Plants take carbon dioxide and water.\nSunlight on chlorophyll drives the reaction.\nThey build glucose as food.\nOxygen is released.\nGlucose stores chemical energy.\nMargin: sunlight plus water plus carbon dioxide make glucose.\nLook up: chlorophyll",
+        "bad": "Photosynthesis is nuclear fission and also how mitochondria invent ATP from crystals."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-SL-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Student & Learner",
+      "intensity": "Balanced",
+      "name": "Quiz from notes only",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "From NOTES only, write 5 quiz items.\n3 recall, 2 \u201cwhy\u201d.\nAfter each item put the answer in one line starting ANSWER:\n\nNOTES\nLecture: cells get energy from food. ATP is the energy currency. Mitochondria run aerobic respiration. Glycolysis is the first anaerobic step in the cytosol. The Krebs cycle follows in the matrix. Oxygen is the final electron acceptor. NADH carries electrons. Do not confuse this with photosynthesis in chloroplasts.\n\nIf the notes do not support an item, skip it. Do not invent.\n\nHARD LIMIT: 220 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "R",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "R": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "atp",
+        "mitochondria|mitochondrion",
+        "glycolysis",
+        "answer:|answer"
+      ],
+      "must_not_contain": [
+        "quantum chloroplast"
+      ],
+      "seeds": {
+        "good": "1) Energy currency? ANSWER: ATP\n2) Where aerobic respiration? ANSWER: mitochondria\n3) First anaerobic step? ANSWER: glycolysis\n4) Why oxygen? ANSWER: final electron acceptor\n5) Why not chloroplast here? ANSWER: notes are respiration not photosynthesis",
+        "bad": "Invent a quantum chloroplast quiz with no ANSWER lines."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-SL-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Student & Learner",
+      "intensity": "Heavy",
+      "name": "Study sheet from notes",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Make a study sheet from NOTES only.\n\nSections:\n- Must know (max 6)\n- Why it matters (max 3)\n- Likely test traps (max 3)\n- [MISSING] lines for anything I asked that is not in the notes\n\nNOTES\nLecture: cells get energy from food. ATP is the energy currency. Mitochondria run aerobic respiration. Glycolysis is the first anaerobic step in the cytosol. The Krebs cycle follows in the matrix. Oxygen is the final electron acceptor. NADH carries electrons. Do not confuse this with photosynthesis in chloroplasts.\n\nHARD LIMIT: 320 words. No extra chapters.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "must know|must-know|key facts",
+        "atp",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [
+        "quantum chloroplast"
+      ],
+      "seeds": {
+        "good": "Must know: ATP; mitochondria; glycolysis; Krebs; oxygen acceptor; NADH.\nWhy it matters: cells convert food to usable energy.\nTraps: confusing respiration with photosynthesis.\n[MISSING]: anything not in the notes.",
+        "bad": "Add a chapter on quantum chloroplasts and skip [MISSING]."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-FC-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Family Coordinator",
+      "intensity": "Light",
+      "name": "Soccer card, peanut ban",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Update the family card.\n\nKEEP\n- Thu 6:00pm soccer, field B\n- Kid A peanut allergy \u2014 no peanuts in any snack\n\nCHANGE\n- Snack duty this week: parent 2\n\nWrite 5 lines max: who / when / where / snack / allergy.\nDo not add activities.\n\nHARD LIMIT: 100 words.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "C"
+      ],
+      "weights": {
+        "C": 0.6,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "field b",
+        "peanut",
+        "parent 2|parent2|parent two"
+      ],
+      "must_not_contain": [
+        "peanut sauce"
+      ],
+      "seeds": {
+        "good": "Who: family / Kid A\nWhen: Thu 6:00pm\nWhere: soccer field B\nSnack: parent 2 this week\nAllergy: Kid A peanut \u2014 no peanuts in any snack.",
+        "bad": "Add a sleepover and pack peanut sauce for snacks."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-FC-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Family Coordinator",
+      "intensity": "Balanced",
+      "name": "Saturday, one car, two events",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Build Sat 9\u20135 for two kids.\n\nFACTS\n- Kid A soccer 11:00\u201312:15 field B\n- Kid B birthday party 12:00\u20132:00, 4 miles from field B\n- One car 11:00\u20132:00\n- Parent 2 is free after 1:30\n\nTable: time | person | place | car.\nIf both events overlap with one car write [WON'T FIT] and one option.\n\nHARD LIMIT: 200 words.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "S",
+        "R"
+      ],
+      "weights": {
+        "S": 0.3,
+        "R": 0.3,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "[won't fit]|will not fit|wont fit|cannot fit|can't fit|does not fit|won't fit",
+        "soccer",
+        "party"
+      ],
+      "must_not_contain": [
+        "babysitter"
+      ],
+      "seeds": {
+        "good": "11:00 | Kid A soccer | field B | car yes\n12:00 | Kid B | party | [WON'T FIT] one car 11-2\nOption: Parent 2 takes party after 1:30; Kid A waits at field.",
+        "bad": "Invent a second car and a babysitter I did not name."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-FC-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Family Coordinator",
+      "intensity": "Heavy",
+      "name": "Merged calendars, conflicts only",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Merge these two calendars. Do not add events.\n\nPARENT 1\nMon 9-5 office. Wed 4pm dentist kid A (drive). Fri 7pm dinner.\nPARENT 2\nTue remote. Thu 6pm soccer field B snack duty. Sat off.\nKIDS\nMon-Fri school 8am. Sat 11am soccer. Sun 2pm grandparents.\n\nOutput:\n1) Shared week grid\n2) Conflicts only\n3) Questions I must answer (max 4)\n\nHARD LIMIT: 300 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "I",
+        "S",
+        "F"
+      ],
+      "weights": {
+        "I": 0.2,
+        "S": 0.2,
+        "F": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "conflict|conflicts|clash",
+        "soccer",
+        "dentist"
+      ],
+      "must_not_contain": [
+        "hawaii",
+        "babysitter"
+      ],
+      "seeds": {
+        "good": "Grid: Mon school; Wed dentist kid A vs parent 1 drive; Thu soccer field B.\nConflicts: Wed 4pm dentist needs a driver.\nQuestions: who drives Wednesday? snack packed?",
+        "bad": "Invent a babysitter and a Hawaii trip during school."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-RS-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Researcher & Shopper",
+      "intensity": "Light",
+      "name": "Three laptops, cheapest that fits",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Compare ONLY these three. Do not add models.\n\nA: 14-inch, 16GB, $899, 1.3kg\nB: 14-inch, 32GB, $1299, 1.4kg\nC: 16-inch, 16GB, $1099, 1.8kg\n\nNeed: travel, 16GB min, budget $1100.\n\nTable: name | RAM | weight | price | fit? (yes/no + 3 words)\nThen one line: cheapest that fits, or [NONE].\n\nHARD LIMIT: 140 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "R",
+        "I"
+      ],
+      "weights": {
+        "R": 0.3,
+        "I": 0.3,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "899",
+        "16gb",
+        "fits|fit"
+      ],
+      "must_not_contain": [
+        "64gb"
+      ],
+      "seeds": {
+        "good": "A | 16GB | 1.3kg | 899 | yes \u2014 travel weight\nB | 32GB | 1.4kg | 1299 | no \u2014 over budget\nC | 16GB | 1.8kg | 1099 | no \u2014 over budget / heavy\nCheapest that fits: A",
+        "bad": "Buy imaginary 64GB laptop D at $500."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-RS-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Researcher & Shopper",
+      "intensity": "Balanced",
+      "name": "Headset pick from facts",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "I will buy one. Use FACTS only.\n\nFACTS\nH1 BoomMic USB: boom mic, USB-A, mute LED, $89, 280g.\nH2 AirBuds: no boom, Bluetooth only, $59, no mute light.\nH3 StudioX USB: boom mic, USB-C, no mute light, $139.\nH4 DeskLite: boom mic, USB-A, mute LED, $119, 310g.\n\nMust: mic boom, USB, under $120.\nWant: mute light.\n\nWrite:\n- Winner + 2 lines why (cite facts)\n- Runner-up + 1 line\n- Rejects + 1 line each\n- [MISSING] if a must is not in FACTS\n\nHARD LIMIT: 200 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "R",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "R": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "h1|boommic",
+        "boom",
+        "usb"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Winner H1 BoomMic USB: boom mic, USB, $89 under $120, mute LED.\nRunner-up H4 DeskLite: boom USB mute but $119 heavier.\nReject H2 no boom. Reject H3 $139 over budget.",
+        "bad": "Winner is a fake $20 wireless I invented."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-RS-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Researcher & Shopper",
+      "intensity": "Heavy",
+      "name": "Shortlist without invented rows",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Build a 4-row shortlist from PASTE only.\nColumns: option | price | must-haves hit | deal-breaker | source line.\nThen 4 reject rules I should keep next time.\n\nIf PASTE has fewer than 4 options, do not invent rows.\n\nPASTE\nOpt1 City Hatch $18,400, AWD, 32 mpg, source line 12.\nOpt2 Compact EV $27,900, FWD, 220 mi, source line 18.\nOpt3 Used wagon $12,200, AWD, 140k miles, source line 22.\n\nHARD LIMIT: 280 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "opt1|option 1|opt 1",
+        "opt2|option 2|opt 2",
+        "opt3|option 3|opt 3"
+      ],
+      "must_not_contain": [
+        "spaceship"
+      ],
+      "seeds": {
+        "good": "Opt1 | 18400 | AWD | miles unknown | line 12\nOpt2 | 27900 | range 220 | FWD | line 18\nOpt3 | 12200 | AWD | 140k miles | line 22\nOnly three options in PASTE \u2014 do not invent a fourth.\nReject rules: inventing prices; ignoring source line; adding a fourth car; trusting memory specs.",
+        "bad": "Add Opt4 spaceship $1 from a review I made up."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-WC-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Writer & Communicator",
+      "intensity": "Light",
+      "name": "Dry rewrite, keep the numbers",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Rewrite DRAFT in VOICE. Do not add facts.\n\nVOICE: dry, specific, no slogans, no emoji.\nMAX: 80 words.\nKeep every number that is already in DRAFT.\n\nDRAFT\nWe missed the 12 May ship date by 4 days. Two engineers were out. The client still wants the 3pm review on Thursday. I am furious this slipped.\n\nHARD LIMIT: 80 words of output + 1 line word count.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "C"
+      ],
+      "weights": {
+        "C": 0.6,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "12 may|may 12",
+        "4 days|four days",
+        "3pm"
+      ],
+      "must_not_contain": [
+        "99%"
+      ],
+      "seeds": {
+        "good": "We missed the 12 May ship date by 4 days. Two engineers were out. The client still wants the 3pm review on Thursday.\nWord count: 32",
+        "bad": "We crushed it and invented a 99% on-time score. No 3pm."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-WC-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Writer & Communicator",
+      "intensity": "Balanced",
+      "name": "Email, Slack, one-line status",
+      "ttft_s": 8,
+      "total_s": 45,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Same FACTS. Three pieces:\n1) email subject + 3-line body\n2) Slack, max 40 words\n3) 1-sentence status\n\nFACTS\nShip slipped 4 days. Review stays Thursday 3pm. Owner: Priya. No discount offered. Next build Friday 10am.\nVOICE: calm, no hype.\n\nDo not add a metric that is not in FACTS.\n\nHARD LIMIT: 180 words total.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "F"
+      ],
+      "weights": {
+        "I": 0.3,
+        "F": 0.3,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "thursday|thu|thurs",
+        "3pm",
+        "priya"
+      ],
+      "must_not_contain": [
+        "50%"
+      ],
+      "seeds": {
+        "good": "Subject: Thursday 3pm review still on\nBody: Ship slipped 4 days. Priya owns it. Next build Friday 10am.\nSlack: Review stays Thursday 3pm; no discount.\nStatus: Slip is 4 days; Thursday 3pm holds.",
+        "bad": "We are offering 50% off and a new NPS of 90."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-WC-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Writer & Communicator",
+      "intensity": "Heavy",
+      "name": "Outline plus header 1 only",
+      "ttft_s": 12,
+      "total_s": 90,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Audience: hiring manager at a regional paper\nPiece: personal statement\nLength target: 600 words later, not now.\n\nFrom NOTES only:\n1) 6-header outline\n2) Write ONLY header 1, max 120 words\n3) [MISSING] for holes\n\nNOTES\nAudience: hiring manager at a regional paper. Piece: 600-word personal statement later. Notes: interned at Harbor Lab summer 2024; GPA 3.6; edited campus weekly; no Rhodes; lived at 14 Oak Street junior year.\n\nDo not write the full piece.\n\nHARD LIMIT: 280 words this turn.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "F",
+        "R"
+      ],
+      "weights": {
+        "I": 0.2,
+        "F": 0.2,
+        "R": 0.2,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "harbor lab",
+        "3.6",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [
+        "rhodes"
+      ],
+      "seeds": {
+        "good": "1 Harbor Lab\n2 GPA 3.6\n3 Campus weekly\n4 Oak Street\n5 What I want next\n6 Close\nHeader 1: I interned at Harbor Lab in summer 2024 and did not invent awards.\n[MISSING]: scholarships not listed in notes.",
+        "bad": "I won a Rhodes Scholarship and a 4.9 GPA."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-CP-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Creative Prosumer",
+      "intensity": "Light",
+      "name": "Three captions, no unlock",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Asset: 8s clip of a desk lamp turning on.\nAudience: makers, 20\u201335.\nWrite 3 captions, different angle (utility / mood / mistake).\nMax 12 words each. No emoji. No \u201cunlock\u201d.\n\nHARD LIMIT: 80 words.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "lamp",
+        "utility|useful|practical"
+      ],
+      "must_not_contain": [
+        "unlock",
+        "shocking"
+      ],
+      "seeds": {
+        "good": "Utility: Desk lamp, one switch, work starts.\nMood: Warm click, then the desk wakes.\nMistake: I shot the glare. Lamp still won.",
+        "bad": "UNLOCK your potential with shocking unhinged lamp secrets."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-CP-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Creative Prosumer",
+      "intensity": "Balanced",
+      "name": "Still prompt plus two lines",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Write text only. Do not render.\n\nSTILL PROMPT\n- 4:5 photo, warm lamp left, cold monitor right\n- product: black headset on stand\n- rejects: extra fingers, readable fake logos, watermark\n\nThen:\n- IG line \u226480 chars\n- YT title \u226450 chars\n\nHARD LIMIT: 160 words.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "I": 0.3,
+        "S": 0.3,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "headset",
+        "4:5|4x5|4 5",
+        "watermark"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "STILL: 4:5 photo, warm lamp left, cold monitor right, black headset on stand, no extra fingers, no fake logos, no watermark.\nIG: Night desk, headset waiting.\nYT: Headset still, lamp versus monitor",
+        "bad": "Add extra fingers and a Nike logo watermark."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-CP-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Creative Prosumer",
+      "intensity": "Heavy",
+      "name": "Weekend scratch-repair brief",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "I have Sat morning. One piece: \u201crepair a scratch on a desk\u201d timelapse.\n\nWrite:\n1) 5-beat shot list (SEE / HEAR only)\n2) 1 still-prompt for the thumbnail\n3) 1 caption\n4) 3 things I will not do (scope)\n\nHARD LIMIT: 260 words. No gear I did not name.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "S",
+        "R"
+      ],
+      "weights": {
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.2,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "scratch",
+        "see",
+        "hear"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "1 SEE sanding block HEAR paper grit\n2 SEE filler HEAR quiet room\n3 SEE lamp HEAR nothing extra\n4 SEE clear coat HEAR hiss\n5 SEE desk surface HEAR done\nThumbnail: close scratch then smooth wood.\nCaption: Saturday, one scratch.\nWill not: buy a new desk; film a series; name gear I did not.",
+        "bad": "Add a drone and a celebrity cameo."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-PA-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Personal Adviser",
+      "intensity": "Light",
+      "name": "Keep the car vs buy used",
+      "ttft_s": 7,
+      "total_s": 30,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Decision: keep the 2018 car 2 more years vs buy used \u2264$18k.\n\nFACTS I HAVE\n- Car paid off\n- Last year repairs $1,400\n- Commute 12 miles\n\nWrite:\n- Option A / B, 3 lines each\n- What I must still find out (max 4)\n- Do not recommend a lender or a diagnosis\n\nHARD LIMIT: 180 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "I",
+        "F"
+      ],
+      "weights": {
+        "I": 0.3,
+        "F": 0.3,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "1400",
+        "18k|18000",
+        "12 miles|12 mile"
+      ],
+      "must_not_contain": [
+        "fastcash"
+      ],
+      "seeds": {
+        "good": "A Keep 2018: paid off, $1400 repairs last year, 12 miles commute.\nB Buy used <=$18k: unknown reliability.\nStill find out: inspection, insurance, winter tires, cash vs loan.\nNo bank pick.",
+        "bad": "Go to lender FastCash and get this diagnosis: engine is dead."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-PA-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Personal Adviser",
+      "intensity": "Balanced",
+      "name": "Decision card from facts",
+      "ttft_s": 10,
+      "total_s": 60,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Build a card.\n\nQUESTION: Keep the 2018 car two more years versus buy used at or under $18k.\nFACTS: Car is paid off. Last year repairs $1,400. Commute 12 miles. No lender quotes yet.\n\nSections:\n- What is already decided\n- Two paths\n- Kill this plan if\u2026\n- [MISSING]\n\nNo medical/legal/tax rules unless they appear in FACTS.\n\nHARD LIMIT: 220 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "I": 0.3,
+        "S": 0.3,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "already decided|decided",
+        "[missing]|missing",
+        "18k|18000"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Already decided: commute 12 miles, car paid off.\nPath keep vs buy used <=$18k.\nKill if repair quote exceeds cash you can float.\n[MISSING]: inspection, insurance quotes.",
+        "bad": "You must take this antibiotic and file this lawsuit."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-PA-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Personal Adviser",
+      "intensity": "Heavy",
+      "name": "Memo from quotes only",
+      "ttft_s": 15,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Use QUOTES only.\n\nQUOTES\n\"I can float $400/month.\" \"Winter tires are shot.\" \"Bus is not an option on Sundays.\" \"I will not finance junk.\"\n\nWrite:\n1) Situation in 4 lines\n2) Options (max 3)\n3) Tradeoffs table\n4) What I am not qualified to decide here\n\nHARD LIMIT: 320 words. Two turns if longer.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "400/month|400 a month|400 per month",
+        "winter tires|winter tyre",
+        "not qualified|not able to decide|outside my"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Situation: $400/month float, winter tires shot, no Sunday bus, will not finance junk.\nOptions: keep and repair tires; buy used cash; wait.\nTradeoffs table: cash vs reliability.\nNot qualified: medical, legal, tax.",
+        "bad": "I diagnose the engine and pick a lender APR of 2%."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-TH-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Technical Hobbyist",
+      "intensity": "Light",
+      "name": "TypeError, smallest patch",
+      "ttft_s": 8,
+      "total_s": 40,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Explain this error in 6 lines. Then the smallest change.\n\nLANG: Python 3\nERROR\nTypeError: can only concatenate str (not \"int\") to str\n  File \"app.py\", line 12, in show\n    print(\"score: \" + n)\nCODE\nn = 7\nprint(\"score: \" + n)\n\n\nNo tutorial. No extra libraries.\n\nHARD LIMIT: 160 words + a short patch.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "str",
+        "int",
+        "str(n)|str n|f-string"
+      ],
+      "must_not_contain": [
+        "disable antivirus"
+      ],
+      "seeds": {
+        "good": "print concatenates str with int n.\nSmallest change: print(\"score: \" + str(n)) or an f-string.\nNo extra libraries.",
+        "bad": "Disable antivirus and pip install a random fixer."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-TH-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Technical Hobbyist",
+      "intensity": "Balanced",
+      "name": "One file, wav durations",
+      "ttft_s": 12,
+      "total_s": 90,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Write one file.\n\nJOB: read a folder of .wav names and print duration seconds using stdlib + one common lib if needed. If a lib is required name it.\n\nConstraints: Python 3, one file, no comments that restate the code.\n\nHARD LIMIT: 70 lines.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "R",
+        "I"
+      ],
+      "weights": {
+        "R": 0.3,
+        "I": 0.3,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "wav",
+        "duration|seconds",
+        "python"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Python 3 stdlib wave: print duration seconds for each wav.\nimport wave, pathlib\nfor p in pathlib.Path('.').glob('*.wav'):\n    with wave.open(str(p)) as w:\n        print(p.name, w.getnframes()/float(w.getframerate()))\nstdlib wave is enough.",
+        "bad": "Use a paid cloud API and 12 extra libraries."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "C-TH-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Consumer",
+      "persona": "Technical Hobbyist",
+      "intensity": "Heavy",
+      "name": "Pico reset after WiFi",
+      "ttft_s": 18,
+      "total_s": 150,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Board: Pico. Symptom: resets ~10s after WiFi connect.\n\nCODE\nwhile True:\n    wlan.connect(ssid, password)\n    time.sleep(10)\n    print(wlan.ifconfig())\n    # never sleeps after connect; watchdog bites ~10s\n\n\n1) Most likely cause, 5 lines\n2) Patched function only\n3) How I confirm\n\nDo not rewrite unrelated files.\n\nHARD LIMIT: 90 lines of code + 8 lines of why.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "R",
+        "F",
+        "I"
+      ],
+      "weights": {
+        "R": 0.2,
+        "F": 0.2,
+        "I": 0.2,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "watchdog|wdt",
+        "sleep|time.sleep",
+        "wifi|wi-fi|wi fi"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Most likely: tight loop after WiFi connect, watchdog ~10s.\nPatch: sleep or feed WDT after connect; do not spin forever.\nConfirm: serial log stays up past 15s.",
+        "bad": "Rewrite the entire MicroPython port and blame the USB cable only."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-CG-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Casual Gamer",
+      "intensity": "Light",
+      "name": "Three owned picks, 90 minutes",
+      "ttft_s": 5,
+      "total_s": 20,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "I have 90 minutes. I like cozy or light co-op. I own: Stardew, Overcooked 2, Rocket League.\n\nGive 3 picks, 8 words of why each. No new titles I must buy.\n\nHARD LIMIT: 80 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "stardew",
+        "overcooked",
+        "rocket league"
+      ],
+      "must_not_contain": [
+        "elden"
+      ],
+      "seeds": {
+        "good": "Stardew: cozy farm, drop-in 90 minutes.\nOvercooked 2: light co-op kitchen chaos.\nRocket League: short matches, no new buy.",
+        "bad": "You must buy Elden Ring tonight."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-CG-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Casual Gamer",
+      "intensity": "Balanced",
+      "name": "Stardew, 20 minutes, six steps",
+      "ttft_s": 8,
+      "total_s": 40,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Game: Stardew. I have 20 minutes before bed.\nTell me exactly what to do in 6 steps. No lore.\n\nHARD LIMIT: 120 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I",
+        "R"
+      ],
+      "weights": {
+        "I": 0.3,
+        "R": 0.3,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "stardew",
+        "water|watering|water crops|water the farm",
+        "sleep|go to bed|bedtime|turn in|go to sleep|save and sleep"
+      ],
+      "must_not_contain": [
+        "overclock"
+      ],
+      "seeds": {
+        "good": "Stardew: 1) Load farm\n2) Water crops in reach\n3) Pet animals nearby\n4) Ship one chest item\n5) Sleep if energy low\n6) Quit. No lore.",
+        "bad": "Here is the full Stardew wiki and overclock your GPU."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-CG-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Casual Gamer",
+      "intensity": "Heavy",
+      "name": "Saturday Stardew blocks",
+      "ttft_s": 10,
+      "total_s": 75,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Game: Stardew. Window: Sat 2\u20135pm. Goal: have fun, not min-max.\nPlan 3 blocks of 50 min + 10 min break.\nEach block: one goal I can finish.\n\nHARD LIMIT: 180 words.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "F",
+        "C",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "C": 0.2,
+        "S": 0.2,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "50 min|50 minutes|50-minute|fifty minutes|50m",
+        "stardew",
+        "break|rest|pause|take ten"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Stardew Block 1 50 min: finish the farm loop you can close.\nBreak 10.\nBlock 2 50 min: one mine trip or fishing, stop at the timer.\nBreak 10.\nBlock 3 50 min: gift or build one thing, then save. Fun not min-max.",
+        "bad": "Min-max every skill and invent a game you do not own."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-PP-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Power Player",
+      "intensity": "Light",
+      "name": "Tier list from the patch paste",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Tier these ONLY: Jett, Sage, Phoenix, Brimstone, Harbor.\nPatch: Jett dash cooldown +2s. Sage slow orb +1s. Phoenix curveball unchanged. Brim stim beacon heal -10. Harbor wall duration -1s.\nRows: S / A / B / C / leave-out.\nOne reason each, max 8 words, tied to the paste.\n\nHARD LIMIT: 140 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "jett",
+        "sage",
+        "dash"
+      ],
+      "must_not_contain": [
+        "90%"
+      ],
+      "seeds": {
+        "good": "S Sage \u2014 slow orb slower, still utility.\nA Phoenix \u2014 unchanged curveball.\nB Brimstone \u2014 stim heal down.\nC Jett \u2014 dash cooldown +2s.\nLeave-out Harbor \u2014 wall shorter, not my pool.",
+        "bad": "Jett is S because a fake 90% winrate I invented."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-PP-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Power Player",
+      "intensity": "Balanced",
+      "name": "Six slots from pasted stats",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "STATS\nRifle: 30 dmg body, 0.9s ADS. SMG: 18 dmg, 0.4s ADS. Shotgun: 15x8, 1.2s ADS. Armor 50. Sprint 5.8 m/s. Goal: burst.\nGoal: burst\nGive: 6 item/skill slots + 1 sentence why each.\nDo not add stats not in PASTE. Use [MISSING].\n\nHARD LIMIT: 200 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "30 dmg|30 damage",
+        "burst",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Rifle primary: 30 dmg body, burst.\nSMG close: 18, faster ADS.\nShotgun: 15x8.\nArmor 50.\nSprint 5.8.\n[MISSING] a sixth named skill not in STATS \u2014 do not invent ADS on a knife.",
+        "bad": "Add a secret 200 dmg sniper not in the paste."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-PP-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Power Player",
+      "intensity": "Heavy",
+      "name": "Jett patch plan, no fake winrates",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "MAIN: Jett\nPATCH NOTES (paste)\nJett dash cooldown +2s. Sage slow orb +1s. Phoenix curveball unchanged. Brim stim beacon heal -10. Harbor wall duration -1s.\n\n1) Buffs / nerfs that touch MAIN\n2) Drop / keep / try \u2014 3 lines\n3) One thing I should test in 10 games\n\nHARD LIMIT: 240 words. No invented winrates.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "jett",
+        "dash",
+        "cooldown|cool down"
+      ],
+      "must_not_contain": [
+        "72.4"
+      ],
+      "seeds": {
+        "good": "Nerf: Jett dash cooldown +2s.\nDrop dash-heavy entry for 10 games; keep knives; try Sage utility.\nTest: first-death rate when you still dash off cooldown.",
+        "bad": "Jett now has a 72.4% winrate I made up."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-CR-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Progressive Creator",
+      "intensity": "Light",
+      "name": "Five hooks, caption, thumbnail prompt",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "You are my short-form editor, not a hype bot.\n\nCLIP CONTEXT\n- 12s vertical clip: clean desk, monitor glow, hands drop a headset onto a stand\n- Audience: PC gamers and creators, 18\u201334\n- Tone: calm, specific, zero \u201cunlock your potential\u201d\n- Must not invent specs I didn\u2019t give\n\nTASK\n1) Write 5 hooks (max 8 words each). Each hook must be a different angle:\n   curiosity / sensory / mistake / status / utility\n2) Write 1 caption (max 120 characters) + 3 hashtags that are actually used, not junk\n3) Write 1 image-model prompt for a thumbnail that matches the clip\n   - 9:16\n   - same mood as \u201cwarm lamp + cold monitor\u201d\n   - no readable fake logos, no extra fingers, no watermark\n\nFORMAT\nHooks:\n1. ...\nCaption:\n...\nThumbnail prompt:\n...\n\nAfter the three blocks, add 2 lines only:\n- Weakest hook and why\n- One detail the thumbnail must keep consistent with the clip\n\nHARD LIMIT: 280 words total. No preamble.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "hooks|hook",
+        "caption",
+        "thumbnail|thumb nail"
+      ],
+      "must_not_contain": [
+        "unlock your potential"
+      ],
+      "seeds": {
+        "good": "Hooks:\n1. What lands after midnight?\n2. Click, glow, stand.\n3. I dropped it wrong.\n4. Setup that looks finished.\n5. Headset, then the chair.\nCaption: Desk, lamp, stand \u2014 no specs I did not give.\nThumbnail prompt: 9:16 warm lamp left, cold monitor, headset on stand, no fake logos, no extra fingers, no watermark.\nWeakest: status, too vague.\nKeep: headset on the stand.",
+        "bad": "Unlock your potential. RTX 9090 invented specs."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-CR-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Progressive Creator",
+      "intensity": "Balanced",
+      "name": "Headset shoot brief, no social copy",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "You are a creative producer sitting next to me. Do not write ads. Write a shoot brief.\n\nPRODUCT\n- Over-ear gaming headset, matte black, subtle green accent ring on the cup\n- We sell \u201clate-session comfort,\u201d not RGB fireworks\n\nAUDIENCE\n- People who stream or edit after midnight, not arena-finals fantasy\n\nCONSTRAINTS\n- No celebrity lookalikes\n- No readable UI on screens\n- No invented awards, dB numbers, or \u201cused by pros\u201d\n- Talent is one adult, mid-20s, any gender, hoodie, tired-but-focused face\n- Room: small apartment studio, practical lamps, not a warehouse set\n\nDELIVER\n1) Logline (1 sentence)\n2) 30-second beat sheet (6 beats, each beat = what we SEE + what we HEAR)\n3) 3 must-keep visual rules (identity of the product)\n4) 3 automatic rejects (common AI mistakes for this scene)\n5) Then wait. Do not write social copy yet.\n\nHARD LIMIT: 400 words. No preamble.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "I": 0.3,
+        "S": 0.3,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "logline|log line",
+        "see",
+        "hear",
+        "green"
+      ],
+      "must_not_contain": [
+        "used by pros"
+      ],
+      "seeds": {
+        "good": "Logline: After midnight, one headset, late-session comfort.\nBeats: SEE hoodie HEAR room tone; SEE green accent ring; SEE no UI; SEE lamp; SEE stand; SEE cut.\nMust-keep: matte black cups, green ring, no RGB fireworks.\nRejects: extra ears, celebrity face, fake dB numbers.\nNo social copy.",
+        "bad": "Used by pros, 40dB, celebrity lookalike, then a full ad script."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-CR-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Progressive Creator",
+      "intensity": "Heavy",
+      "name": "North Lamp episode 04 board",
+      "ttft_s": 18,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "CANON: North Lamp. Nara, silver streak behind LEFT ear, scar through LEFT eyebrow, gold chain, olive jacket. Rainy port city.\nEPISODE 04 brief: Nara waits for a ferry that never shows; she leaves before the rain gets worse. New canon (approve?): dented steel thermos \u2014 treat as YES for this turn.\nGive: 4-frame board (A setup / B wait / C decision / D leave); continuity vs a prior episode; image prompts A-D; I2V for Frame C (3 seconds, one gesture); QC: streak side, scar side, chain, jacket, thermos dent.\nHARD LIMIT: 700 words. One line per shot. No novel. NOT IN CANON if you invent a brand.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "S",
+        "F"
+      ],
+      "weights": {
+        "I": 0.2,
+        "S": 0.2,
+        "F": 0.2,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "nara",
+        "left ear",
+        "thermos",
+        "frame|frames"
+      ],
+      "must_not_contain": [
+        "nike"
+      ],
+      "seeds": {
+        "good": "Frame A setup: Nara at ferry, silver streak behind left ear, LEFT scar, olive jacket, dented thermos.\nFrame B wait: rain, sodium lights.\nFrame C decision: she leaves.\nFrame D leave: thermos in hand.\nQC: streak left, scar left, chain, olive, dent.\nNOT IN CANON: any real brand logo.",
+        "bad": "Nara is a celebrity lookalike in Nike with streak on the right ear."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-RD-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Rising Game Developer",
+      "intensity": "Light",
+      "name": "2D move jump coins",
+      "ttft_s": 10,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Can you write a Unity C# script for a simple 2D player?\n\nI want left/right movement, a jump only when they are on the ground, and collecting coins. When they touch a coin, add 1 to a score and print it in the console, then remove the coin.\n\nI already have a player with a Rigidbody2D. Coins are triggers tagged \"Coin\". I can add a small ground check object at the feet.\n\nPlease put the full script in your answer and a short list of what I should hook up in the Inspector. Don't create a Unity project and don't walk me through installing Unity.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "rigidbody2d|rigidbody",
+        "jump",
+        "coin|coins",
+        "inspector"
+      ],
+      "must_not_contain": [
+        "unity hub",
+        "hit play",
+        "new 2d project"
+      ],
+      "seeds": {
+        "good": "using UnityEngine;\npublic class PlayerMove : MonoBehaviour {\n  public Rigidbody2D rb;\n  public Transform groundCheck;\n  void Update() { /* left/right; jump only if grounded */ }\n  void OnTriggerEnter2D(Collider2D other) {\n    if (other.CompareTag(\"Coin\")) { score += 1; Debug.Log(score); Destroy(other.gameObject); }\n  }\n}\nInspector: drag GroundCheck, set ground layer, tag coins Coin. I did not create a Unity project.",
+        "bad": "Open Unity Hub, File New 2D project, then Hit Play and send a screenshot of the 3D controller."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-RD-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Rising Game Developer",
+      "intensity": "Balanced",
+      "name": "Patrol chase return",
+      "ttft_s": 12,
+      "total_s": 100,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "I need a Unity C# enemy script.\n\nIt should walk back and forth between two points. If the player comes within a detect range, it chases. If the player gets far enough away, it walks back to where it started and then patrols again.\n\nPlease use a simple state machine with Patrol, Chase, and Return so I can add Attack later without rewriting it. Put the speeds and ranges as fields I can change in the Inspector. If you can, add gizmos for the two ranges.\n\nOne script in the chat is enough. Tell me what to drag onto the component. Don't build a scene for me and don't use NavMesh unless I ask.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "R",
+        "I"
+      ],
+      "weights": {
+        "R": 0.3,
+        "I": 0.3,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "patrol",
+        "chase",
+        "return",
+        "inspector"
+      ],
+      "must_not_contain": [
+        "navmesh"
+      ],
+      "seeds": {
+        "good": "One PatrolChaser script. enum State { Patrol, Chase, Return }. Inspector fields: pointA, pointB, player, detectRange, loseRange, speeds. Gizmos for the two ranges. Drag point A, point B, and the player onto the component.",
+        "bad": "Use NavMesh and three files. I will build the scene in the Editor for you."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "G-RD-H",
+      "alias": "GAM-RGD-H-001",
+      "version": "1.0.0",
+      "business": "Gaming",
+      "persona": "Rising Game Developer",
+      "intensity": "Heavy",
+      "name": "Dash bugs and fix",
+      "ttft_s": 18,
+      "total_s": 180,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "My player dash is buggy. If I mash the button I dash twice and go flying. If I dash into a thin wall I end up on the other side.\n\nHere is the script:\n\nvoid Update() {\n    if (Input.GetButtonDown(\"Jump\"))\n        StartCoroutine(DashBroken());\n}\n\nIEnumerator DashBroken() {\n    float facing = Mathf.Sign(transform.localScale.x);\n    float t = 0f;\n    while (t < dashTime) {\n        transform.Translate(Vector3.right * facing * dashSpeed * Time.deltaTime);\n        t += Time.deltaTime;\n        yield return null;\n    }\n}\n\nFirst tell me why both bugs happen. Then write the fixed dash script I can paste over this one.\n\nI want a cooldown so I cannot start another dash while one is running, and I want the move to use the Rigidbody so it stops at walls instead of sliding through them. A short raycast in front each step is fine.\n\nOne script in the chat plus a few lines mapping each bug to the fix. Don't ask me to hit Play and report back. Don't add extra systems.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "R",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "P": 0.4,
+        "R": 0.25,
+        "I": 0.2,
+        "S": 0.15
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "cooldown|cool down",
+        "translate|transform.translate|slides through",
+        "rigidbody",
+        "wall|walls|collider"
+      ],
+      "must_not_contain": [
+        "hit play"
+      ],
+      "seeds": {
+        "good": "Mash starts a second coroutine so you dash twice. Translate ignores colliders so you tunnel through a thin wall.\nFixed script: cooldown flag while dashing; move with Rigidbody2D.MovePosition; raycast in front and stop at the wall.",
+        "bad": "Hit Play and tell me what you see. Send a Play-mode video."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-ED-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Executive & Decision Maker",
+      "intensity": "Light",
+      "name": "Contractor vs freeze",
+      "ttft_s": 8,
+      "total_s": 30,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "QUESTION: hire contractor 3 months vs freeze the workstream.\nFACTS\n- Budget left $42k\n- Need date Oct 15\n- Internal owner at 0.3 FTE\n\nWrite 3 options, 2 lines each, then 1 recommend line.\nDo not invent a vendor name or a date.\n\nHARD LIMIT: 160 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "42k|42000",
+        "oct 15|october 15|15 oct",
+        "0.3"
+      ],
+      "must_not_contain": [
+        "apex"
+      ],
+      "seeds": {
+        "good": "Option 1: hire 3-month contractor within $42k.\nOption 2: freeze until owner is more than 0.3 FTE.\nOption 3: split scope to Oct 15 with owner only.\nRecommend: freeze noncritical work; do not invent a vendor.",
+        "bad": "Hire Vendor ApexCloud on Nov 1 for $2M."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-ED-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Executive & Decision Maker",
+      "intensity": "Balanced",
+      "name": "One-pager from metrics",
+      "ttft_s": 10,
+      "total_s": 70,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "METRICS (do not add)\nRevenue $12.4M vs $11.9M plan. Gross margin 41.2%. Vendor delay 3 weeks. Ask: two QA contractors through Oct 15. Budget left $42k.\n\nPage:\n- What changed\n- So what\n- Options (max 3)\n- Ask of me\n- [MISSING]\n\nHARD LIMIT: 240 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "12.4",
+        "qa",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [
+        "merger",
+        "crypto"
+      ],
+      "seeds": {
+        "good": "What changed: revenue $12.4M vs $11.9M.\nSo what: margin 41.2% holds; vendor delay 3 weeks.\nOptions: two QA contractors through Oct 15; wait; cut scope.\nAsk: approve QA within $42k.\n[MISSING]: exact vendor penalty.",
+        "bad": "Secret merger and a crypto treasury."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-ED-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Executive & Decision Maker",
+      "intensity": "Heavy",
+      "name": "Go / no-go card",
+      "ttft_s": 15,
+      "total_s": 150,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "DECISION: Hire a 3-month contractor vs freeze the workstream until internal owner is at 0.6 FTE.\nFACTS: Revenue $12.4M vs $11.9M plan. Gross margin 41.2%. Vendor delay 3 weeks. Ask: two QA contractors through Oct 15. Budget left $42k.\n\n1) Go looks like\n2) No-go looks like\n3) Kill this in 30 days if\u2026\n4) What I am not deciding today\n\nHARD LIMIT: 300 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "F": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "go",
+        "no-go|nogo|no go",
+        "30 days|thirty days"
+      ],
+      "must_not_contain": [
+        "crypto"
+      ],
+      "seeds": {
+        "good": "Go looks like: contractor inside $42k, Oct 15 still real.\nNo-go: freeze if owner stays 0.3 FTE.\nKill in 30 days if vendor delay grows.\nNot deciding: next year's headcount.",
+        "bad": "Crypto treasury strategy and a merger I invented."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-PO-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Project & Operations Manager",
+      "intensity": "Light",
+      "name": "Five rows, no invented owner",
+      "ttft_s": 7,
+      "total_s": 30,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Turn this mess into 5 rows: item | owner | date | status | note.\nMESS\nAva will send the deck Friday maybe. Ben has the risk log but no date. API vendor slipped. Launch still marked June. Nobody named for billing.\nIf a field is unknown write [MISSING]. Do not invent an owner.\n\nHARD LIMIT: 140 words.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "S"
+      ],
+      "weights": {
+        "S": 0.6,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "ava",
+        "ben",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Send deck | Ava | Friday | unclear | maybe\nRisk log | Ben | [MISSING] | open |\nAPI vendor | [MISSING] | | slipped |\nLaunch | [MISSING] | June | marked |\nBilling | [MISSING] | | unnamed |",
+        "bad": "Owner: Superman. Date: yesterday. All green."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-PO-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Project & Operations Manager",
+      "intensity": "Balanced",
+      "name": "RACI, one A per task",
+      "ttft_s": 10,
+      "total_s": 70,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Workstream: Launch\nPeople: Ava, Ben, vendor\nTasks: Send deck; update risk log; vendor call; freeze scope; billing checklist\n\nTable: task | R | A | C | I\nOne person in A per task. If you cannot tell, [MISSING].\n\nHARD LIMIT: 200 words.",
+      "primary": "S",
+      "dimensions": [
+        "S",
+        "I",
+        "R",
+        "F"
+      ],
+      "weights": {
+        "I": 0.2,
+        "R": 0.2,
+        "F": 0.2,
+        "S": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "raci|responsible",
+        "ava",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "RACI\nSend deck | R Ava | A Ava | C Ben | I vendor\nRisk log | R Ben | A Ben | C Ava | I\nVendor call | [MISSING] A if unknown\nOne A per row.",
+        "bad": "Everyone is A on every task. Status green."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-PO-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Project & Operations Manager",
+      "intensity": "Heavy",
+      "name": "RAID from notes only",
+      "ttft_s": 15,
+      "total_s": 150,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "NOTES\nBilling must work before launch. API delay makes status amber. Ava owns the deck. Ben owns the risk log. Vendor call Monday. Assumption: June date still real.\n\nFour lists: Risks | Assumptions | Issues | Dependencies\nEach line: statement | owner | date if any | [MISSING] if none\nDo not add items not implied by NOTES.\n\nHARD LIMIT: 280 words.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "S",
+        "I",
+        "F"
+      ],
+      "weights": {
+        "S": 0.2,
+        "I": 0.2,
+        "F": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "billing",
+        "amber",
+        "api"
+      ],
+      "must_not_contain": [
+        "mars"
+      ],
+      "seeds": {
+        "good": "Risks: API delay | [MISSING] owner | | amber\nAssumptions: June date still real | [MISSING]\nIssues: API slipped | \nDependencies: billing before launch | ",
+        "bad": "Add a Mars office risk I did not note."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-EN-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Engineer & Software Developer",
+      "intensity": "Light",
+      "name": "Duplicate-file CLI",
+      "ttft_s": 12,
+      "total_s": 60,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Can you write a small Python script that scans a folder and finds duplicate files by comparing the actual file contents, not the names?\n\nI want it as a command-line tool I can run later myself. Use only the Python standard library. Hash the files in chunks so big files are okay. If the path I give is not a folder, just print an error.\n\nPlease put the full script in your answer and one example of how I would run it. Don't set anything up for me and don't run it.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "hashlib|sha256|sha 256",
+        "argparse|sys.argv|argumentparser",
+        "python"
+      ],
+      "must_not_contain": [
+        "docker",
+        "let me run"
+      ],
+      "seeds": {
+        "good": "\n#!/usr/bin/env python3\n\"\"\"dupscan.py \u2014 find duplicate files by SHA-256. Light Saturday project.\"\"\"\nfrom __future__ import annotations\nimport argparse\nimport hashlib\nfrom collections import defaultdict\nfrom pathlib import Path\n\n\ndef file_hash(path: Path, chunk: int = 1 << 16) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        while block := f.read(chunk):\n            h.update(block)\n    return h.hexdigest()\n\n\ndef scan(root: Path) -> dict[str, list[Path]]:\n    groups: dict[str, list[Path]] = defaultdict(list)\n    for p in root.rglob(\"*\"):\n        if p.is_file():\n            groups[file_hash(p)].append(p)\n    return {k: v for k, v in groups.items() if len(v) > 1}\n\n\ndef main() -> None:\n    parser = argparse.ArgumentParser(description=\"Find duplicate files\")\n    parser.add_argument(\"path\", type=Path, help=\"directory to scan\")\n    args = parser.parse_args()\n    if not args.path.is_dir():\n        raise SystemExit(f\"not a directory: {args.path}\")\n\n    dups = scan(args.path)\n    if not dups:\n        print(\"No duplicates found.\")\n        return\n    for digest, paths in dups.items():\n        print(f\"\\n{digest[:12]}\u2026  ({len(paths)} copies)\")\n        for p in paths:\n            print(f\"  {p}\")\n\n\nif __name__ == \"__main__\":\n    main()\n\nExample: python dupscan.py ./photos\nI did not run this or create files on your machine.",
+        "bad": "Let me run this on your disk with Docker and scan your real folder."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-EN-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Engineer & Software Developer",
+      "intensity": "Balanced",
+      "name": "Publish job API",
+      "ttft_s": 15,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "I need a small FastAPI service for publish jobs.\n\nSomeone posts a job with a platform name and a JSON payload. The API gives back a job id and a status. There should be a GET endpoint to check that job later. Store jobs in a local SQLite file. When a job is created, kick off a background task that just waits a moment and then marks the job as ok \u2014 I will replace that wait with a real upload later.\n\nPlease show me this as one Python file in the chat: models, database table, POST, GET, and the background task. If the id does not exist, return 404.\n\nDon't start the server. Don't install packages. Don't create files. Just write the code and a few lines on how I would run it myself later.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "I": 0.3,
+        "S": 0.3,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "fastapi|fast api",
+        "sqlite|sqlite3",
+        "404|not found"
+      ],
+      "must_not_contain": [
+        "docker",
+        "redis",
+        "i started"
+      ],
+      "seeds": {
+        "good": "\nfrom __future__ import annotations\nimport asyncio\nimport sqlite3\nimport uuid\nfrom contextlib import asynccontextmanager\nfrom datetime import datetime, timezone\nfrom enum import Enum\nfrom pathlib import Path\n\nfrom fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\n\nDB = Path(\"jobs.db\")\n\n\nclass Status(str, Enum):\n    queued = \"queued\"\n    running = \"running\"\n    ok = \"ok\"\n    failed = \"failed\"\n\n\nclass JobIn(BaseModel):\n    platform: str = Field(..., min_length=2, max_length=32)\n    payload: dict\n\n\nclass JobOut(BaseModel):\n    id: str\n    status: Status\n    error: str | None = None\n    updated_at: datetime\n\n\ndef _db() -> sqlite3.Connection:\n    conn = sqlite3.connect(DB)\n    conn.row_factory = sqlite3.Row\n    return conn\n\n\ndef init_db() -> None:\n    with _db() as c:\n        c.execute(\n            \"\"\"CREATE TABLE IF NOT EXISTS jobs (\n                   id TEXT PRIMARY KEY,\n                   platform TEXT NOT NULL,\n                   payload TEXT NOT NULL,\n                   status TEXT NOT NULL,\n                   error TEXT,\n                   updated_at TEXT NOT NULL\n               )\"\"\"\n        )\n\n\nasync def worker(job_id: str) -> None:\n    await asyncio.sleep(0.05)\n    with _db() as c:\n        c.execute(\n            \"UPDATE jobs SET status=?, updated_at=? WHERE id=?\",\n            (Status.ok.value, datetime.now(timezone.utc).isoformat(), job_id),\n        )\n\n\n@asynccontextmanager\nasync def lifespan(_: FastAPI):\n    init_db()\n    yield\n\n\napp = FastAPI(title=\"Publish API\", lifespan=lifespan)\n\n\n@app.post(\"/jobs\", response_model=JobOut, status_code=202)\nasync def create_job(body: JobIn) -> JobOut:\n    job_id = str(uuid.uuid4())\n    now = datetime.now(timezone.utc)\n    with _db() as c:\n        c.execute(\n            \"INSERT INTO jobs VALUES (?,?,?,?,?,?)\",\n            (job_id, body.platform, str(body.payload), Status.queued.value, None, now.isoformat()),\n        )\n    asyncio.create_task(worker(job_id))\n    return JobOut(id=job_id, status=Status.queued, updated_at=now)\n\n\n@app.get(\"/jobs/{job_id}\", response_model=JobOut)\ndef get_job(job_id: str) -> JobOut:\n    with _db() as c:\n        row = c.execute(\"SELECT * FROM jobs WHERE id=?\", (job_id,)).fetchone()\n    if not row:\n        raise HTTPException(404, \"job not found\")\n    return JobOut(\n        id=row[\"id\"],\n        status=Status(row[\"status\"]),\n        error=row[\"error\"],\n        updated_at=datetime.fromisoformat(row[\"updated_at\"]),\n    )\n\nRun uvicorn yourself later: uvicorn publish_api:app --reload\nI did not start the server or install packages.",
+        "bad": "I started it on port 8000 in Docker with Redis."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-EN-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Engineer & Software Developer",
+      "intensity": "Heavy",
+      "name": "Atomic job lease",
+      "ttft_s": 20,
+      "total_s": 210,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "We have a bug. Two workers both pick the same queued job and the customer gets two posts.\n\nHere is the claim function:\n\nasync def claim_job_broken(jobs):\n    for j in jobs:\n        if j.status == \"queued\":\n            j.status = \"leased\"\n            return j\n    return None\n\nCan you explain what is going wrong? Why can two workers both pass that if? What would a correct claim have to do in one step so only one worker wins?\n\nPlease don't write the new code yet. Just explain it in plain language.\n\nOkay, now show me the fixed claim and the worker loop in the chat.\n\nI want one atomic claim, like a single SQL update that leases one row only if it is still queued (or the lease expired), sets a short lease time, and bumps attempts.\n\nThen a worker that: claims a job, tries to publish with exponential backoff, marks ok on success, puts it back in queue on a retryable error, and marks failed on a fatal error.\n\nYou can assume a store with methods like fetch_one, mark_ok, mark_failed, release_to_queued. Don't build the whole app. Don't run anything. Just the explanation, the functions, and a short why.",
+      "primary": "P",
+      "dimensions": [
+        "P",
+        "R",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "R": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "P": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "queued",
+        "race|race condition|two workers",
+        "leased|lease"
+      ],
+      "must_not_contain": [
+        "docker",
+        "running workers"
+      ],
+      "seeds": {
+        "good": "This is a race: two workers both read queued before either writes leased.\n\nfrom __future__ import annotations\nimport asyncio\nimport random\nfrom datetime import datetime, timedelta, timezone\nfrom enum import Enum\n\n\nclass Status(str, Enum):\n    queued = \"queued\"\n    leased = \"leased\"\n    ok = \"ok\"\n    failed = \"failed\"\n\n\nclass Job:\n    def __init__(\n        self,\n        id,\n        platform,\n        attempts=0,\n        status=None,\n        lease_until=None,\n        lease_owner=None,\n    ):\n        self.id = id\n        self.platform = platform\n        self.attempts = attempts\n        self.status = Status.queued if status is None else status\n        self.lease_until = lease_until\n        self.lease_owner = lease_owner\n\n\nclass JobStore:\n    def __init__(self) -> None:\n        self.jobs: list[Job] = []\n        self.lock = asyncio.Lock()\n\n    def add(self, job: Job) -> None:\n        self.jobs.append(job)\n\n    async def mark_ok(self, job_id: str) -> None:\n        async with self.lock:\n            for j in self.jobs:\n                if j.id == job_id:\n                    j.status = Status.ok\n\n    async def mark_failed(self, job_id: str, err: str) -> None:\n        async with self.lock:\n            for j in self.jobs:\n                if j.id == job_id:\n                    j.status = Status.failed\n\n    async def release_to_queued(self, job_id: str) -> None:\n        async with self.lock:\n            for j in self.jobs:\n                if j.id == job_id:\n                    j.status = Status.queued\n                    j.lease_until = None\n                    j.lease_owner = None\n\n\nasync def claim_job_broken(jobs: list[Job]) -> Job | None:\n    for j in jobs:\n        if j.status == Status.queued:\n            await asyncio.sleep(0)\n            j.status = Status.leased\n            return j\n    return None\n\n\nasync def claim_job(store: JobStore, worker_id: str) -> Job | None:\n    now = datetime.now(timezone.utc)\n    async with store.lock:\n        for j in store.jobs:\n            expired = j.status == Status.leased and j.lease_until is not None and j.lease_until < now\n            if j.status == Status.queued or expired:\n                j.status = Status.leased\n                j.lease_owner = worker_id\n                j.lease_until = now + timedelta(seconds=30)\n                j.attempts += 1\n                return j\n    return None\n\n\nclass Retryable(Exception):\n    pass\n\n\nclass Fatal(Exception):\n    pass\n\n\nasync def publish_with_backoff(job: Job) -> None:\n    delay = min(2 ** max(job.attempts, 1), 60)\n    await asyncio.sleep(min(delay * 0.001, 0.02))\n\n\nasync def run_worker(store: JobStore, worker_id: str) -> None:\n    while True:\n        job = await claim_job(store, worker_id)\n        if not job:\n            await asyncio.sleep(0.5)\n            continue\n        try:\n            await publish_with_backoff(job)\n            await store.mark_ok(job.id)\n        except Retryable:\n            await store.release_to_queued(job.id)\n        except Fatal as e:\n            await store.mark_failed(job.id, str(e))\n        except Exception:\n            await store.release_to_queued(job.id)\n            raise\n\nAtomic UPDATE ... WHERE status='queued' OR lease expired. Don't spin up two processes to watch logs.",
+        "bad": "I need to reproduce this by running workers in Docker and watching logs."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-AF-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Analyst & Finance Professional",
+      "intensity": "Light",
+      "name": "July miss note",
+      "ttft_s": 7,
+      "total_s": 30,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "You are my FP&A desk partner, not a storyteller.\n\nFACTS (do not add any others)\n- Month: July\n- Revenue plan: $4,200k\n- Revenue actual: $3,780k\n- Variance: \u2212$420k (\u221210.0%)\nDrivers I already pulled:\n  1) Volume: \u2212$310k (orders 1,840 vs plan 2,050)\n  2) Price / mix: \u2212$70k (more self-serve, less premium)\n  3) FX: \u2212$40k (USD stronger vs EUR)\n- Gross margin still 41.2% vs plan 41.0% (not the issue)\n- Pipeline for August looks on plan per sales ops Slack \u2014 I have not verified\n\nTASK\n1) Write a 6-sentence manager note:\n   - sentence 1 = the miss in $ and %\n   - sentences 2\u20134 = the three drivers, largest first\n   - sentence 5 = what is NOT the problem (margin)\n   - sentence 6 = what I will confirm by Wednesday\n2) Give me 3 questions I should ask Sales, in plain language\n3) Give me 1 sentence I should NOT send (the version that over-claims)\n\nRULES\n- No \u201cheadwinds / tailwinds / unpack / unpacking\u201d\n- No industry benchmark unless I pasted one\n- If you want a number I did not give, write [MISSING]\nMax 220 words. No extra analysis.",
+      "primary": "M",
+      "dimensions": [
+        "M",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "M": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "420k",
+        "10.0|10%",
+        "volume",
+        "margin"
+      ],
+      "must_not_contain": [
+        "headwinds"
+      ],
+      "seeds": {
+        "good": "July revenue was $3,780k vs $4,200k plan (-$420k, -10.0%). Volume $310k. Price/mix $70k. FX $40k. Margin 41.2% is not the issue. Confirm August pipeline by Wednesday.\nQUESTIONS for Sales.\nDO NOT SEND a macro recovery claim.",
+        "bad": "Despite headwinds we outperformed and will fully recover in August per a 14% benchmark I made up."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-AF-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Analyst & Finance Professional",
+      "intensity": "Balanced",
+      "name": "Opex one-pager from the split",
+      "ttft_s": 10,
+      "total_s": 70,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Use ONLY this split I just typed. Do not re-split.\n\nOne-time: contractors $40k + travel $15k = $55k\nRun-rate add: people $70k + contractors $25k + software $30k = $125k\nImplied Q3 opex if we do nothing extra: $2,200k plan + $125k = $2,325k\n[MISSING] exact overtime hours \u2014 payroll file still open\n\nWrite a one-pager in this exact shape:\n\nHEADLINE (\u226418 words, must include $180k and the run-rate $)\nBRIDGE (5 bullets, $ on every line)\nRUN-RATE (4 sentences)\nRECOMMENDATION (keep / cut / watch \u2014 one choice per line: people, contractors, software, travel)\nWATCHOUTS (3; include the [MISSING] overtime item)\n\nVoice: calm, specific, no \u201cleverage / synergy / optimize the cost base.\u201d",
+      "primary": "M",
+      "dimensions": [
+        "M",
+        "F",
+        "S",
+        "R"
+      ],
+      "weights": {
+        "F": 0.2,
+        "S": 0.2,
+        "R": 0.2,
+        "M": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "180k",
+        "125k",
+        "[missing]|missing",
+        "overtime"
+      ],
+      "must_not_contain": [
+        "synergy"
+      ],
+      "seeds": {
+        "good": "HEADLINE: $180k opex miss, $125k run-rate add.\nBRIDGE: people $70k; contractors; software; travel one-time $15k; total $180k.\nRUN-RATE: $2,325k if we do nothing extra.\nRECOMMENDATION: watch people, cut one-time travel, watch software, cut leftover contractors.\nWATCHOUTS: [MISSING] overtime hours.",
+        "bad": "Leverage synergy to optimize the cost base; invent a 20% benchmark."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-AF-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Analyst & Finance Professional",
+      "intensity": "Heavy",
+      "name": "Memo from pasted model outputs",
+      "ttft_s": 15,
+      "total_s": 150,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "PASTED MODEL OUTPUTS (base)\n- Payback: 28 months\n- NPV @ 10%, 3 years, no TV: \u2212$140k\n- Year-1 net cash: \u2212$1.20M\n- Year-2 net cash: +$0.48M\n- Year-3 net cash: +$0.58M\n- Downside (no FTE avoided): payback > 36 months, NPV \u2212$410k\n- Upside (FTE avoided + cycle time actually used to skip a $200k contractor): NPV +$90k\n\nVENDOR CLAIM STATUS\n- 30% cycle time: [UNVERIFIED] \u2014 process owner has not signed\n- 1.5 FTE: [UNVERIFIED] \u2014 no named roles\n\nWrite the decision memo in this shape:\n\nTITLE\nRECOMMENDATION (Go / No-go / Go-if) in 2 sentences, include NPV and payback\nWHY THIS IS NOT OBVIOUS (the toggle that flips the sign)\nCASH BRIDGE (year by year, pasted numbers only)\nCONDITIONS PRECEDENT if Go-if (max 4, each testable)\nKILLS (2 events that mean we stop even after signing)\nAPPENDIX ASK (the two [UNVERIFIED] items and who owes them by when)\n\nTone: investment committee, not vendor webinar.\nIf you reach for a stat I did not paste, write [MISSING] and continue.",
+      "primary": "M",
+      "dimensions": [
+        "M",
+        "F",
+        "S",
+        "R"
+      ],
+      "weights": {
+        "F": 0.2,
+        "S": 0.2,
+        "R": 0.2,
+        "M": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "140k",
+        "28 months|28-month",
+        "unverified"
+      ],
+      "must_not_contain": [
+        "cagr"
+      ],
+      "seeds": {
+        "good": "TITLE Vendor X vs in-house\nRECOMMENDATION Go-if: NPV -$140k, payback 28 months until FTE toggle is verified.\nWHY NOT OBVIOUS: 1.5 FTE avoided flips the sign.\nCASH BRIDGE year-1 -$1.20M, year-2 +$0.48M, year-3 +$0.58M.\nKILLS: process owner never signs; FTE unnamed.\nAPPENDIX: two [UNVERIFIED] claims.",
+        "bad": "Typical SaaS payback is 12 months so we should buy. CAGR 40%."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-RP-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Research & Product Professional",
+      "intensity": "Light",
+      "name": "Problem from notes only",
+      "ttft_s": 8,
+      "total_s": 30,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "From NOTES only.\n\nNOTES\nComment A: Search is fine. Comment B: export to CSV is missing. NPS 32. Quote: \"We would pay for SSO.\" Theme counts: Export 14, Search 3.\n\nWrite:\n- Problem in 2 sentences\n- Evidence (bullet per quote or metric in NOTES)\n- Open questions (max 4)\n- [MISSING]\n\nHARD LIMIT: 180 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "csv",
+        "export",
+        "sso"
+      ],
+      "must_not_contain": [
+        "blockchain",
+        "love ads"
+      ],
+      "seeds": {
+        "good": "Problem: search is fine but CSV export is missing.\nEvidence: NPS 32; quote we would pay for SSO; Export 14 vs Search 3.\nOpen questions: who owns finance load.\n[MISSING]: exact revenue.",
+        "bad": "They love ads and asked for blockchain."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-RP-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Research & Product Professional",
+      "intensity": "Balanced",
+      "name": "Job story slice",
+      "ttft_s": 10,
+      "total_s": 70,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "Job story I want: When I close the month, I want to export the report to CSV so finance can load it.\nEvidence: 14 tickets tagged Export. SSO mentioned in 9 interviews. No blockchain requests.\n\nWrite:\n1) User / job / circumstance\n2) In-scope (max 5)\n3) Out-of-scope (max 5)\n4) Acceptance checks (max 5)\nNo roadmap fiction.\n\nHARD LIMIT: 240 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "R",
+        "S"
+      ],
+      "weights": {
+        "R": 0.3,
+        "S": 0.3,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "csv",
+        "sso",
+        "out-of-scope|out of scope|not in scope"
+      ],
+      "must_not_contain": [
+        "nft"
+      ],
+      "seeds": {
+        "good": "User finance closer, job export CSV, circumstance month end.\nIn-scope: CSV, SSO mentions from evidence.\nOut-of-scope: blockchain, roadmap fiction.\nAcceptance: 12 of 15 style checks later; tickets tagged Export.",
+        "bad": "Roadmap: NFT drop in Q1."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-RP-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Research & Product Professional",
+      "intensity": "Heavy",
+      "name": "Results log, no invented p-values",
+      "ttft_s": 15,
+      "total_s": 150,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "RESULTS\nCSV export prototype: 12 of 15 testers completed unassisted. Time-on-task 4.2 min.\nHYPOTHESIS\nIf we ship CSV, finance tickets drop 30% next quarter.\n\nLog:\n- What we thought\n- What we measured (only pasted numbers)\n- What we did not measure\n- Keep / drop / rerun\n- [MISSING]\n\nHARD LIMIT: 300 words. No p-values you cannot see.",
+      "primary": "R",
+      "dimensions": [
+        "R",
+        "F",
+        "S",
+        "I"
+      ],
+      "weights": {
+        "F": 0.2,
+        "S": 0.2,
+        "I": 0.2,
+        "R": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "4.2",
+        "12 of 15|12/15",
+        "[missing]|missing"
+      ],
+      "must_not_contain": [
+        "p=0.001",
+        "blockchain"
+      ],
+      "seeds": {
+        "good": "Thought: CSV drops finance tickets 30%.\nMeasured: 12 of 15 testers, 4.2 min.\nDid not measure: ticket drop.\nKeep / rerun prototype.\n[MISSING]: p-value \u2014 none pasted.",
+        "bad": "p=0.001 and we should ship blockchain."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-SM-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Sales & Marketing Professional",
+      "intensity": "Light",
+      "name": "Ops blurb from three claims",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "CLAIMS (do not add)\n1) Ships in 5 days\n2) Setup under 30 minutes\n3) Email support, business hours\n\nAudience: ops manager, mid-market.\n80 words max. No awards, no \u201c#1\u201d.\n\nHARD LIMIT: 80 words.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I"
+      ],
+      "weights": {
+        "I": 0.6,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "5 days|five days",
+        "30 minutes|30 min|thirty minutes",
+        "email support|email"
+      ],
+      "must_not_contain": [
+        "#1",
+        "free money"
+      ],
+      "seeds": {
+        "good": "Ships in 5 days. Setup under 30 minutes. Email support in business hours. For an ops manager who needs the floor running, not awards.",
+        "bad": "We are #1 with a fake award and FREE MONEY."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-SM-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Sales & Marketing Professional",
+      "intensity": "Balanced",
+      "name": "Day 0 / 3 / 7, no extra discount",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "CLAIMS: Ships in 5 days. Setup under 30 minutes. Email support, business hours. Slip-resistance per approved lab note. No #1 claim. No discount.\nDay 0 / Day 3 / Day 7\nEach: subject \u226450 chars + 4-line body.\nDo not add a discount unless it is in CLAIMS.\n\nHARD LIMIT: 220 words.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "F"
+      ],
+      "weights": {
+        "I": 0.3,
+        "F": 0.3,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "day 0|day0",
+        "day 3|day3",
+        "5 days|five days"
+      ],
+      "must_not_contain": [
+        "50%"
+      ],
+      "seeds": {
+        "good": "Day 0 subject: Ships in 5 days\nBody: setup under 30 minutes, email support.\nDay 3: still no discount.\nDay 7: slip-resistance only if in claims. No invented sale.",
+        "bad": "Day 0: 50% off flash sale I invented."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-SM-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Sales & Marketing Professional",
+      "intensity": "Heavy",
+      "name": "Objection table from notes",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "NOTES\nObjection: too expensive. Phrase: \"budget locked.\" Answer from notes: 5-day ship cuts downtime. Objection: support weekends. [MISSING]. No case study on file.\n\nTable: objection | exact phrase if any | answer from NOTES | [MISSING] if we have no answer\nMax 6 rows. No invented case studies.\n\nHARD LIMIT: 260 words.",
+      "primary": "C",
+      "dimensions": [
+        "C",
+        "I",
+        "F",
+        "S"
+      ],
+      "weights": {
+        "I": 0.2,
+        "F": 0.2,
+        "S": 0.2,
+        "C": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "budget locked",
+        "[missing]|missing",
+        "5-day|5 day|five day"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "too expensive | budget locked | 5-day ship cuts downtime | \nweekends | | | [MISSING]\nNo invented case study.",
+        "bad": "Acme saved $4M in our imaginary case study."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-CS-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Customer Support Specialist",
+      "intensity": "Light",
+      "name": "Day 41 store credit, policy",
+      "ttft_s": 6,
+      "total_s": 25,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "POLICY: Refunds within 30 days of delivery, original payment method, no cash.\nCustomer: \u201cCan I get store credit on day 41?\u201d\nWrite the reply, 6 lines max. If policy does not allow it, say so. No extra goodwill promise.\n\nHARD LIMIT: 90 words.",
+      "primary": "I",
+      "dimensions": [
+        "I",
+        "F"
+      ],
+      "weights": {
+        "F": 0.6,
+        "I": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "30 days|thirty days",
+        "day 41|day41",
+        "not"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "Refunds are within 30 days to original payment. Day 41 is outside policy. I cannot offer store credit or cash as extra goodwill. I can check if a named agent promised otherwise.",
+        "bad": "Sure, store credit plus a gift card as goodwill."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-CS-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Customer Support Specialist",
+      "intensity": "Balanced",
+      "name": "Reply plus status fields",
+      "ttft_s": 8,
+      "total_s": 50,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "POLICY\nRefunds within 30 days of delivery to original payment method. No cash. Store credit only if the item is unopened and within 14 days. Day 41 is out of policy. Escalate if the customer cites a written promise from a named agent.\nTICKET\nOrder 4419 delivered March 1. Today is April 11 (day 41). Customer wants store credit for a used keyboard. Serial not in ticket. Tone: polite but firm.\n\nOutput:\n- Reply (max 120 words)\n- Status\n- Reason code\n- Next action\nUse [MISSING] if the ticket lacks a fact.\n\nHARD LIMIT: 180 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I",
+        "R"
+      ],
+      "weights": {
+        "I": 0.3,
+        "R": 0.3,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "[missing]|missing",
+        "deny",
+        "serial"
+      ],
+      "must_not_contain": [
+        "oven",
+        "cash refund"
+      ],
+      "seeds": {
+        "good": "Reply: Day 41 is past 30-day refund. Used keyboard. Serial [MISSING] in ticket.\nStatus: deny store credit under policy.\nReason: outside window.\nNext: ask serial if escalate path needs a named promise.",
+        "bad": "Approve cash refund and bake the keyboard."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-CS-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "Customer Support Specialist",
+      "intensity": "Heavy",
+      "name": "Four macros, no new branch",
+      "ttft_s": 12,
+      "total_s": 120,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "POLICY\nRefunds within 30 days of delivery to original payment method. No cash. Store credit only if the item is unopened and within 14 days. Day 41 is out of policy. Escalate if the customer cites a written promise from a named agent.\n\nWrite 4 macros: allow / deny / need-more-info / escalate\nEach: when to use (1 line) + text (max 70 words)\nDo not invent a policy branch.\n\nHARD LIMIT: 320 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I",
+        "R",
+        "S"
+      ],
+      "weights": {
+        "I": 0.2,
+        "R": 0.2,
+        "S": 0.2,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "allow",
+        "deny",
+        "escalate",
+        "need-more-info|need more info|need more information"
+      ],
+      "must_not_contain": [],
+      "seeds": {
+        "good": "ALLOW: within 30 days original payment.\nDENY: day 41, used item, no cash.\nNEED-MORE-INFO: serial missing.\nESCALATE: written promise from a named agent.\nNo extra policy branch.",
+        "bad": "ALLOW: always credit after day 90 as a new policy I wrote."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-PLC-L",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "People, Legal & Compliance Professional",
+      "intensity": "Light",
+      "name": "Manager rewrite, keep 30 days",
+      "ttft_s": 8,
+      "total_s": 35,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "SOURCE\nEmployees must give 30 days written notice. Garden leave may apply. Do not discuss pending investigations with the press.\nCONSTRAINTS I MUST KEEP\nKeep the 30-day notice. Do not add a non-compete. Manager audience, not counsel.\n\nRewrite for a manager audience.\nIf a constraint cannot be kept in plain language, quote it.\nDo not add a rule.\n\nHARD LIMIT: 180 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "I": 0.3,
+        "S": 0.3,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "30 days|thirty days",
+        "press"
+      ],
+      "must_not_contain": [
+        "non-compete"
+      ],
+      "seeds": {
+        "good": "People give 30 days written notice. Garden leave may apply. Do not talk to the press about pending investigations. I did not add extra rules.",
+        "bad": "Also they cannot work anywhere in the state for two years (new rule)."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-PLC-B",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "People, Legal & Compliance Professional",
+      "intensity": "Balanced",
+      "name": "Clause table, no new rows",
+      "ttft_s": 12,
+      "total_s": 75,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "TEXT\nClause 4: Vendor shall notify Customer within 10 days of a security incident. Clause 12: Customer may audit on 10 days notice. Clause 19: venue Delaware. Clause 4 vs 19 do not mention employees.\n\nTable: clause | who it binds | trigger | obligation | exception | [MISSING]\nMax 8 rows. No new clauses.\n\nHARD LIMIT: 240 words.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "I",
+        "R",
+        "S"
+      ],
+      "weights": {
+        "I": 0.2,
+        "R": 0.2,
+        "S": 0.2,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "clause 12",
+        "delaware",
+        "10 days|ten days"
+      ],
+      "must_not_contain": [
+        "mars"
+      ],
+      "seeds": {
+        "good": "clause 4 | vendor | security incident | notify in 10 days | [MISSING] exception\nclause 12 | customer | audit | 10 days notice | \nclause 19 | parties | venue | Delaware | \nNo new clauses.",
+        "bad": "New clause 99: Mars office mandatory."
+      },
+      "research_basis": "role-playbooks"
+    },
+    {
+      "id": "B-PLC-H",
+      "alias": null,
+      "version": "1.0.0",
+      "business": "Commercial",
+      "persona": "People, Legal & Compliance Professional",
+      "intensity": "Heavy",
+      "name": "Issue memo, not legal advice",
+      "ttft_s": 18,
+      "total_s": 150,
+      "attempts": 1,
+      "fixture": null,
+      "prompt": "DOCUMENT\nMaster services agreement. Effective 2026-01-15. Governing law Delaware. Audit rights clause 12: 10 days notice. Retention of logs 2 years. No unlimited liability cap stated.\nQUESTION\nWhat must we do before an audit, and what is missing on liability?\n\nMemo:\n- Issues found (cite a line)\n- What the document does not say\n- Questions for counsel / HR (max 5)\n- What I did not decide\n\nHARD LIMIT: 320 words. Not legal advice.",
+      "primary": "F",
+      "dimensions": [
+        "F",
+        "R",
+        "I",
+        "S"
+      ],
+      "weights": {
+        "R": 0.2,
+        "I": 0.2,
+        "S": 0.2,
+        "F": 0.4
+      },
+      "grader": "rules",
+      "json_required": false,
+      "numbers": {},
+      "code_kind": null,
+      "code_tests": "",
+      "sandbox_prelude": "",
+      "hard_gates": [],
+      "must_contain": [
+        "audit",
+        "clause 12",
+        "not legal advice|not legal"
+      ],
+      "must_not_contain": [
+        "waive all liability"
+      ],
+      "seeds": {
+        "good": "Issues: audit rights 10 days notice from clause 12; effective 2026-01-15 Delaware.\nDoes not say: unlimited liability cap.\nQuestions for counsel: liability, retention 2 years.\nI did not decide to waive liability.\nNot legal advice.",
+        "bad": "Waive all liability and skip counsel."
+      },
+      "research_basis": "role-playbooks"
+    }
+  ]
+}

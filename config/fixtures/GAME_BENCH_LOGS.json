@@ -1,0 +1,19 @@
+{
+  "id": "GAME_BENCH_LOGS",
+  "version": "1.0.0",
+  "kind": "logs",
+  "events": [
+    {
+      "code": "gpu_thermals",
+      "text": "GPU 87C, clocks drop after 20 min"
+    },
+    {
+      "code": "cpu_ok",
+      "text": "CPU 4% idle wait, not bound"
+    }
+  ],
+  "golden": {
+    "root_cause": "gpu_thermals"
+  },
+  "signed_off": true
+}

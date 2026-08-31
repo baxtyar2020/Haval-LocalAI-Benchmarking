@@ -1,0 +1,19 @@
+{
+  "id": "PC_DIAGNOSTIC",
+  "version": "1.0.0",
+  "kind": "logs",
+  "events": [
+    {
+      "code": "failing_ssd",
+      "text": "Event 7 disk error, SMART reallocated sectors rising"
+    },
+    {
+      "code": "boot_loop",
+      "text": "Unexpected restart during Windows load"
+    }
+  ],
+  "golden": {
+    "root_cause": "failing_ssd"
+  },
+  "signed_off": true
+}

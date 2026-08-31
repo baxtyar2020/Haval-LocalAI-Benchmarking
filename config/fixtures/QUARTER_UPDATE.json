@@ -1,0 +1,15 @@
+{
+  "id": "QUARTER_UPDATE",
+  "version": "1.0.0",
+  "kind": "text",
+  "revenue_m": 12.4,
+  "risk": "delayed vendor",
+  "ask": "QA headcount",
+  "golden": {
+    "must_appear": [
+      "12.4",
+      "QA"
+    ]
+  },
+  "signed_off": true
+}

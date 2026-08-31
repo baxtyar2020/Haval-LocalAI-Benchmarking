@@ -1,0 +1,22 @@
+{
+  "id": "COMPETITOR_TABLE",
+  "version": "1.0.0",
+  "kind": "catalog",
+  "items": [
+    {
+      "id": "Acme",
+      "sso": true
+    },
+    {
+      "id": "Rival",
+      "sso": true
+    }
+  ],
+  "quotes": [
+    "We would pay for SSO"
+  ],
+  "golden": {
+    "winner": "Acme"
+  },
+  "signed_off": true
+}

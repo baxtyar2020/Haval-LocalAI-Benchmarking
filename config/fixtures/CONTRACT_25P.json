@@ -1,0 +1,116 @@
+{
+  "id": "CONTRACT_25P",
+  "version": "1.0.0",
+  "kind": "contract",
+  "effective_date": "2026-01-15",
+  "governing_law": "Delaware",
+  "notice_days": 30,
+  "clauses": [
+    {
+      "n": 1,
+      "text": "Placeholder clause 1."
+    },
+    {
+      "n": 2,
+      "text": "Placeholder clause 2."
+    },
+    {
+      "n": 3,
+      "text": "Placeholder clause 3."
+    },
+    {
+      "n": 4,
+      "text": "Venue is Delaware courts."
+    },
+    {
+      "n": 5,
+      "text": "Placeholder clause 5."
+    },
+    {
+      "n": 6,
+      "text": "Placeholder clause 6."
+    },
+    {
+      "n": 7,
+      "text": "Placeholder clause 7."
+    },
+    {
+      "n": 8,
+      "text": "Placeholder clause 8."
+    },
+    {
+      "n": 9,
+      "text": "Placeholder clause 9."
+    },
+    {
+      "n": 10,
+      "text": "Placeholder clause 10."
+    },
+    {
+      "n": 11,
+      "text": "Placeholder clause 11."
+    },
+    {
+      "n": 12,
+      "text": "The Vendor grants audit rights on 10 days notice (clause 12)."
+    },
+    {
+      "n": 13,
+      "text": "Placeholder clause 13."
+    },
+    {
+      "n": 14,
+      "text": "Placeholder clause 14."
+    },
+    {
+      "n": 15,
+      "text": "Placeholder clause 15."
+    },
+    {
+      "n": 16,
+      "text": "Placeholder clause 16."
+    },
+    {
+      "n": 17,
+      "text": "Placeholder clause 17."
+    },
+    {
+      "n": 18,
+      "text": "Placeholder clause 18."
+    },
+    {
+      "n": 19,
+      "text": "Venue may also be the supplier home courts."
+    },
+    {
+      "n": 20,
+      "text": "Placeholder clause 20."
+    },
+    {
+      "n": 21,
+      "text": "Placeholder clause 21."
+    },
+    {
+      "n": 22,
+      "text": "Placeholder clause 22."
+    },
+    {
+      "n": 23,
+      "text": "Placeholder clause 23."
+    },
+    {
+      "n": 24,
+      "text": "Placeholder clause 24."
+    },
+    {
+      "n": 25,
+      "text": "Placeholder clause 25."
+    }
+  ],
+  "golden": {
+    "effective_date": "2026-01-15",
+    "audit_clause": 12,
+    "audit_snippet": "audit rights on 10 days notice"
+  },
+  "signed_off": true
+}

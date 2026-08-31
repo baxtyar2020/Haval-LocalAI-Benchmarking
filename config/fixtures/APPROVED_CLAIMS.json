@@ -1,0 +1,14 @@
+{
+  "id": "APPROVED_CLAIMS",
+  "version": "1.0.0",
+  "kind": "text",
+  "claims": [
+    "slip-resistance"
+  ],
+  "golden": {
+    "must_appear": [
+      "slip-resistance"
+    ]
+  },
+  "signed_off": true
+}

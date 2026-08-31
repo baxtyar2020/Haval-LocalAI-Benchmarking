@@ -1,0 +1,62 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-08-30",
+  "notes": "Standard Roster (Decision D-2). Sorted by total parameters, smallest first. Qwen 3 Coder Next (80B MoE) replaces Qwen 3 Next on this list. GPT-OSS 20B is not a preferred catalog entry; users may still search, install, and benchmark it.",
+  "models": [
+    {
+      "id": "gemma4:26b",
+      "display_name": "Gemma 4",
+      "tag": "26B",
+      "family": "Gemma",
+      "pull": "gemma4:26b",
+      "params": "26B-A3.8B",
+      "quant": "Q4_K_M",
+      "size_hint": "~16 GB",
+      "roster_order": 1
+    },
+    {
+      "id": "qwen3-coder:30b",
+      "display_name": "Qwen 3 Coder",
+      "tag": "30B",
+      "family": "Qwen",
+      "pull": "qwen3-coder:30b",
+      "params": "30B-A3.3B",
+      "quant": "Q4_K_M",
+      "size_hint": "~18 GB",
+      "roster_order": 2
+    },
+    {
+      "id": "kimi-linear-48b",
+      "display_name": "Kimi Linear",
+      "tag": "48B",
+      "family": "Kimi",
+      "pull": "hf.co/mradermacher/Kimi-Linear-48B-A3B-Instruct-GGUF:Q4_K_S",
+      "params": "48B-A3B",
+      "quant": "Q4_K_S",
+      "size_hint": "~28 GB",
+      "roster_order": 3
+    },
+    {
+      "id": "qwen3-coder-next:latest",
+      "display_name": "Qwen 3 Coder Next",
+      "tag": "80B",
+      "family": "Qwen",
+      "pull": "qwen3-coder-next:latest",
+      "params": "80B-A3B",
+      "quant": "Q4_K_M",
+      "size_hint": "~48 GB",
+      "roster_order": 4
+    },
+    {
+      "id": "gpt-oss:120b",
+      "display_name": "GPT-OSS",
+      "tag": "120B",
+      "family": "GPT-OSS",
+      "pull": "gpt-oss:120b",
+      "params": "120B-A5.1B",
+      "quant": "Q4_K_M",
+      "size_hint": "~65 GB",
+      "roster_order": 5
+    }
+  ]
+}

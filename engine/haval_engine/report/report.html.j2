@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{{ headline }}</title>
+  <style>{{ css|safe }}</style>
+</head>
+<body>
+  <header class="shell top"><div class="brand"><span class="mark">H</span><span>Haval LocalAI Bench<span class="sub">Hardware-first suitability report</span></span></div><div class="topmeta"><span>Run {{ run_id }}</span><span class="chip">{{ subject }} · {{ persona_count }} personas · 3 attempts · {{ 'thinking on' if thinking else 'thinking off' }}</span></div></header>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="kicker">This PC · one model</div>
+        <h1>{{ headline_html|safe }}</h1>
+      </div>
+      <aside class="verdict verdict-{{ suit_class }}">
+        <div class="verdict-stage" aria-hidden="true">
+          <span class="verdict-orb"></span>
+          <span class="verdict-spark s1"></span>
+          <span class="verdict-spark s2"></span>
+          <span class="verdict-spark s3"></span>
+          <span class="verdict-spark s4"></span>
+          <span class="verdict-spark s5"></span>
+          {% if suit_class in ['no', 'failed', 'marginal'] %}
+          <svg class="sign sign-x" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l10 10M21 11L11 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          <svg class="sign sign-warn" viewBox="0 0 32 32" fill="none"><path d="M16 5l13 22H3L16 5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 13v7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.4" fill="currentColor"/></svg>
+          <svg class="sign sign-minus" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          <svg class="sign sign-ban" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1.8"/><path d="M8 24L24 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="sign sign-alert" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M16 11v7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="22" r="1.3" fill="currentColor"/></svg>
+          <svg class="sign sign-x2" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          {% else %}
+          <svg class="sign sign-check" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 16.5l4.2 4.2 8.8-9.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="sign sign-bolt" viewBox="0 0 32 32" fill="none"><path d="M18 4L8 18h8l-2 10 12-16h-8L18 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <svg class="sign sign-chip" viewBox="0 0 32 32" fill="none"><rect x="9" y="9" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M13 4v5m6-5v5M13 23v5m6-5v5M4 13h5m-5 6h5M23 13h5m-5 6h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg class="sign sign-star" viewBox="0 0 32 32" fill="none"><path d="M16 5l2.6 7.4H26l-6 4.6 2.3 7.5L16 20.2 9.7 24.5 12 17 6 12.4h7.4L16 5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="sign sign-star st2" viewBox="0 0 32 32" fill="none"><path d="M16 5l2.6 7.4H26l-6 4.6 2.3 7.5L16 20.2 9.7 24.5 12 17 6 12.4h7.4L16 5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="sign sign-star st3" viewBox="0 0 32 32" fill="none"><path d="M16 5l2.6 7.4H26l-6 4.6 2.3 7.5L16 20.2 9.7 24.5 12 17 6 12.4h7.4L16 5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="sign sign-star st4" viewBox="0 0 32 32" fill="none"><path d="M16 5l2.6 7.4H26l-6 4.6 2.3 7.5L16 20.2 9.7 24.5 12 17 6 12.4h7.4L16 5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="sign sign-plus" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          <svg class="sign sign-bars" viewBox="0 0 32 32" fill="none"><path d="M8 22V14M16 22V8M24 22v-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          {% endif %}
+          <svg class="illu illu-live" viewBox="0 0 200 128" fill="none">
+            <rect class="illu-pc" x="58" y="28" width="84" height="56" rx="9" stroke="currentColor" stroke-width="2.4"/>
+            <rect class="illu-screen" x="68" y="38" width="64" height="36" rx="3" fill="currentColor" opacity=".12"/>
+            <rect class="illu-scan" x="68" y="38" width="64" height="6" rx="1" fill="currentColor"/>
+            <path d="M86 96h28" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M78 104h44" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
+            <circle class="illu-dot d1" cx="78" cy="50" r="2.2" fill="currentColor"/>
+            <circle class="illu-dot d2" cx="100" cy="56" r="2.2" fill="currentColor"/>
+            <circle class="illu-dot d3" cx="122" cy="48" r="2.2" fill="currentColor"/>
+            <path class="illu-wave" d="M154 42c8 8 8 24 0 32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path class="illu-wave w2" d="M164 34c14 12 14 36 0 48" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+          </svg>
+        </div>
+        <div class="verdict-subcard">
+          <div class="circle">{{ models[0].Qd if models else "—" }}</div>
+          <div>
+            <div class="verdict-kicker">Overall match</div>
+            <h4 class="has-tip" data-tip="{{ models[0].suit_why }}">{{ models[0].suitability if models else "Failed" }}</h4>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section">
+      <div class="head"><div><div class="label">01 · Test platform</div><h2>The hardware being evaluated.</h2></div><p class="note">The report evaluates this model-and-hardware combination. The same model may receive a different match on another system.</p></div>
+      <div class="hardware">
+        <div class="tile">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="4" width="30" height="40" rx="5"/><circle cx="24" cy="34" r="5"/><path d="M15 11h18M15 17h12"/></svg>
+          <b class="tile-name">{{ product }}</b>
+          <span class="tile-accent">{{ os_label }}</span>
+        </div>
+        <div class="tile">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="12" width="38" height="24" rx="4"/><circle cx="17" cy="24" r="6"/><path d="M29 19h8M29 25h8M29 31h5"/></svg>
+          <b class="tile-name">{{ gpu }}</b>
+          {% if gpu_vram_label and not unified_memory %}<span class="tile-accent">{{ gpu_vram_label }} VRAM</span>
+          {% elif unified_memory %}<span class="tile-accent">Shared with system memory</span>{% endif %}
+        </div>
+        <div class="tile">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="12" y="12" width="24" height="24" rx="3"/><rect x="18" y="18" width="12" height="12"/><path d="M16 4v8m8-8v8m8-8v8M16 36v8m8-8v8m8-8v8M4 16h8m-8 8h8m-8 8h8m24-16h8m-8 8h8m-8 8h8"/></svg>
+          <b class="tile-name">{{ cpu }}</b>
+        </div>
+        <div class="tile tile-ram">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="14" width="34" height="20" rx="3"/><path d="M13 20v8m6-8v8m6-8v8m6-8v8m6-8v8M12 10v4m6-4v4m6-4v4m6-4v4m6-4v4"/></svg>
+          <b class="tile-name">{{ mem_kind }}</b>
+          <span class="tile-accent">{{ ram }}</span>
+        </div>
+      </div>
+      <div class="platform-note"><strong>Decision context:</strong> capacity depends on model bytes, KV cache, runtime overhead, context, and headroom — not parameter count alone. {% if thinking %}Thinking was enabled for every generate call on this run.{% else %}Thinking was disabled for every generate call on this run.{% endif %}</div>
+    </section>
+
+    <section class="section">
+      <div class="head"><div><div class="label">02 · Business fit</div><h2>How this model matches each customer type.</h2></div><p class="note">These three labels can disagree. A strong Commercial match does not imply a strong Consumer match. Run another model separately to compare.</p></div>
+      <div class="winnergrid">
+        {% if not winners.Consumer.skipped %}
+        <article class="winner consumer">
+          <div class="winner-top">
+            <svg class="winner-ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="16" r="6"/><circle cx="30" cy="16" r="6"/><path d="M8 38c2-8 6-12 10-12s8 4 10 12M30 26c4 0 8 4 10 12"/></svg>
+            <div class="biz">Consumer</div>
+          </div>
+          {% for bar in winners.Consumer.bars %}
+          <div class="mix-row"><strong>{{ bar.pct }}%</strong><span>of use cases are</span><span class="status {{ bar.cls }} has-tip" data-tip="{{ bar.why }}">{{ bar.label }}</span></div>
+          {% endfor %}
+        </article>
+        {% endif %}
+        {% if not winners.Gaming.skipped %}
+        <article class="winner gaming">
+          <div class="winner-top">
+            <svg class="winner-ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="6" y="16" width="36" height="20" rx="10"/><path d="M16 26h6M19 23v6"/><circle cx="30" cy="24" r="1.6" fill="currentColor"/><circle cx="34" cy="28" r="1.6" fill="currentColor"/></svg>
+            <div class="biz">Gaming</div>
+          </div>
+          {% for bar in winners.Gaming.bars %}
+          <div class="mix-row"><strong>{{ bar.pct }}%</strong><span>of use cases are</span><span class="status {{ bar.cls }} has-tip" data-tip="{{ bar.why }}">{{ bar.label }}</span></div>
+          {% endfor %}
+        </article>
+        {% endif %}
+        {% if not winners.Commercial.skipped %}
+        <article class="winner commercial">
+          <div class="winner-top">
+            <svg class="winner-ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="8" y="18" width="32" height="22" rx="3"/><path d="M16 18v-4a8 8 0 0 1 16 0v4M8 28h32"/></svg>
+            <div class="biz">Commercial</div>
+          </div>
+          {% for bar in winners.Commercial.bars %}
+          <div class="mix-row"><strong>{{ bar.pct }}%</strong><span>of use cases are</span><span class="status {{ bar.cls }} has-tip" data-tip="{{ bar.why }}">{{ bar.label }}</span></div>
+          {% endfor %}
+        </article>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="head"><div><div class="label">03 · Measured evidence</div><h2>What this hardware delivered.</h2></div><p class="note">Tok/s, TTFT, and mean completion are averages of finished attempts. Quality is the combined Phase 1 + Phase 2 score.</p></div>
+      <div class="tablecard"><div class="scroll"><table>
+        <thead><tr><th>Model</th><th>Architecture</th><th>Total / Active</th><th>Quant.</th><th>Model Bytes</th><th>Tok/s</th><th>TTFT</th><th>Mean completion</th><th>Phase 1</th><th>Phase 2</th><th>Final</th><th>Finish</th></tr></thead>
+        <tbody>
+        {% for m in models %}
+          <tr>
+            <td class="model">{{ m.display }}</td>
+            <td>{{ m.ident.arch }}</td>
+            <td class="mono"><strong>{{ m.ident.total }}</strong> total · <strong>{{ m.ident.active }}</strong> active</td>
+            <td>{{ m.ident.quant }}</td>
+            <td>{{ m.ident.bytes }}</td>
+            <td class="mono">{{ m.tok }}</td>
+            <td class="mono">{{ m.ttft }}</td>
+            <td class="mono">{{ m.task }}</td>
+            <td class="mono">{{ m.p1d }}</td>
+            <td class="mono">{{ m.p2d }}</td>
+            <td class="mono">{{ m.Qd }}</td>
+            <td class="mono">{{ m.Rd }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div><div class="caption"><span>Em dashes mean the value was not measured on this run</span><span>{{ 'Thinking enabled on every generate' if thinking else 'Thinking disabled on every generate' }}</span></div>      </div>
+    </section>
+
+    <section class="section">
+      <div class="head"><div><div class="label">04 · Persona results</div><h2>{{ persona_count }} persona{{ 's' if persona_count != 1 else '' }} in this run.</h2></div><p class="note">Only the personas chosen before Start are listed. Hover a Match label for why it is Failed, Not Recommended, or Marginal. Final is 50% Phase 1 + 50% Phase 2.</p></div>
+      {% for m in models %}
+        <article class="model-persona-block">
+          <div class="model-persona-head">
+            <div>
+              <div class="model-persona-name">{{ m.display }}</div>
+              <div class="model-persona-meta">{{ m.ident.arch }} · <strong>{{ m.ident.total }}</strong> total · <strong>{{ m.ident.active }}</strong> active · {{ m.ident.quant }}</div>
+            </div>
+            <div class="business-result-strip">
+              <span class="business-result"><b style="color:var(--consumer)">Consumer</b><span class="status {{ m.businesses.Consumer.cls }} has-tip" data-tip="{{ m.businesses.Consumer.why }}">{{ m.businesses.Consumer.customer }}</span></span>
+              <span class="business-result"><b style="color:var(--gaming)">Gaming</b><span class="status {{ m.businesses.Gaming.cls }} has-tip" data-tip="{{ m.businesses.Gaming.why }}">{{ m.businesses.Gaming.customer }}</span></span>
+              <span class="business-result"><b style="color:var(--commercial)">Commercial</b><span class="status {{ m.businesses.Commercial.cls }} has-tip" data-tip="{{ m.businesses.Commercial.why }}">{{ m.businesses.Commercial.customer }}</span></span>
+            </div>
+          </div>
+          {% if m.failed %}
+            <div class="tablecard" style="padding:22px"><strong>Failed</strong> — {{ m.fail_reason }} Scores are not invented.</div>
+          {% else %}
+            <div class="tablecard"><div class="scroll"><table class="persona-table">
+              <thead><tr><th>Business</th><th>Persona</th><th>Light</th><th>Balanced</th><th>Heavy</th><th>Phase 1</th><th>Phase 2</th><th>Final</th><th>Match</th></tr></thead>
+              <tbody>
+              {% for p in m.personas %}
+                <tr>
+                  <td><span class="biztag {{ p.bizclass }}">{{ p.business }}</span></td>
+                  <td class="model">{{ p.persona }}</td>
+                  <td>{{ p.light }}</td><td>{{ p.balanced }}</td><td>{{ p.heavy }}</td>
+                  <td>{{ p.phase1 }}</td><td>{{ p.phase2 }}</td><td>{{ p.overall }}</td>
+                  <td><span class="status {{ p.final_class }} has-tip" data-tip="{{ p.why }}">{{ p.final }}</span></td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table></div></div>
+          {% endif %}
+        </article>
+      {% endfor %}
+      <div class="taxonomy-note">Failed means no gradeable answer. Slow never turns a finished run into Failed. Phase 2 does not include multilingual or sensitivity.</div>
+    </section>
+
+    <section class="section">
+      <div class="head"><div><div class="label">05 · Phase 2</div><h2>Capability pack for this model.</h2></div><p class="note">Reasoning, coding, instruction following, structured output, and math. Multilingual and sensitivity are excluded. Correct answers that miss the category time limit do not receive credit.</p></div>
+      {% for m in models %}
+        <div class="tablecard"><div class="scroll"><table>
+          <thead><tr><th>Model</th><th>Category</th><th>Correct</th><th>Total</th><th>Score</th></tr></thead>
+          <tbody>
+          {% for row in m.phase2_rows %}
+            <tr>
+              <td class="model">{{ m.display }}</td>
+              <td>{{ row.name }}</td>
+              <td class="mono">{{ row.correct }}</td>
+              <td class="mono">{{ row.total }}</td>
+              <td class="mono">{{ row.pct }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table></div><div class="caption"><span>Excluded: {{ m.phase2_excluded }}</span><span>Phase 2 capability pack</span></div></div>
+      {% endfor %}
+    </section>
+
+    <section class="section">
+      <div class="equations score-explain">
+        <div>
+          <div class="label">06 · Scoring</div>
+          <h3>How this has been calculated</h3>
+        </div>
+        <div class="score-copy">
+          <p>Haval LocalAI Benchmarking shows how well one model works on this specific PC for real people and real tasks. It tests each role with light, balanced, and heavy work three times, measuring answer quality, response time, and reliability. It also separately checks core skills such as reasoning, coding, instruction following, structured answers, and math. Different roles value different skills. For example, an Engineer needs strong coding and reasoning; a Writer values clear instruction following and structured output; an Analyst needs stronger math. A model is never penalized for skills a role does not need.</p>
+          <p>In general, for one persona on this PC it calculates:</p>
+          <div class="math" aria-label="F equals one half P1 plus one half P2, with P1 and P2 defined">
+            <i>F</i> = <span class="frac"><span>1</span><span>2</span></span><i>P</i><sub>1</sub> + <span class="frac"><span>1</span><span>2</span></span><i>P</i><sub>2</sub>
+            <span class="math-pipe" aria-hidden="true">|</span>
+            <i>P</i><sub>1</sub> = 0.70 <span class="tilde">C̃</span> + 0.15 <i>S</i> + 0.10 <i>K</i> + 0.05 <i>H</i>
+            <span class="math-gap" aria-hidden="true"></span>
+            <i>P</i><sub>2</sub> = <span class="frac"><span>∑<sub>i</sub> <i>w</i><sub>i</sub> <i>c</i><sub>i</sub></span><span>∑<sub>i</sub> <i>w</i><sub>i</sub></span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="head"><div><div class="label">07 · Persona reference</div><h2>Who the business scores represent.</h2></div><p class="note">Personas describe task patterns, not demographics.</p></div>
+      <div class="tablecard"><div class="scroll"><table class="definition">
+        <thead><tr><th>Business</th><th>Persona</th><th>Typical day-to-day work</th><th>What they need from AI</th></tr></thead>
+        <tbody>
+        {% for biz, name, work, need in persona_ref %}
+          <tr>
+            <td><span class="biztag {{ biz|lower }}">{{ biz }}</span></td>
+            <td class="model">{{ name }}</td>
+            <td>{{ work }}</td>
+            <td>{{ need }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div><div class="caption"><span>Broad, task-focused persona definitions</span><span>Consumer · Gaming · Commercial</span></div></div>
+    </section>
+  </main>
+  <footer class="shell footer"><span>Haval LocalAI Bench · measured run report</span><span>Run {{ run_id }} · {{ status }}</span></footer>
+  <div id="match-tip" hidden></div>
+  <script>
+  (function () {
+    var tip = document.getElementById("match-tip");
+    if (!tip) return;
+    function hide() { tip.hidden = true; }
+    function show(el) {
+      var text = el.getAttribute("data-tip") || "";
+      if (!text) return;
+      tip.textContent = text;
+      tip.hidden = false;
+      var r = el.getBoundingClientRect();
+      var w = Math.min(320, window.innerWidth - 24);
+      tip.style.width = w + "px";
+      var left = Math.min(Math.max(12, r.left + r.width / 2 - w / 2), window.innerWidth - w - 12);
+      var top = r.top - 10 - tip.offsetHeight;
+      if (top < 8) top = r.bottom + 10;
+      tip.style.left = left + "px";
+      tip.style.top = top + "px";
+    }
+    document.querySelectorAll(".has-tip[data-tip]").forEach(function (el) {
+      el.setAttribute("tabindex", "0");
+      el.addEventListener("mouseenter", function () { show(el); });
+      el.addEventListener("mouseleave", hide);
+      el.addEventListener("focus", function () { show(el); });
+      el.addEventListener("blur", hide);
+    });
+    window.addEventListener("scroll", hide, true);
+  })();
+  </script>
+</body>
+</html>

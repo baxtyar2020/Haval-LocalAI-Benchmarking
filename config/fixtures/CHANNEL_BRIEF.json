@@ -1,0 +1,13 @@
+{
+  "id": "CHANNEL_BRIEF",
+  "version": "1.0.0",
+  "kind": "text",
+  "tone": "helpful",
+  "rating": "PG",
+  "golden": {
+    "must_appear": [
+      "helpful"
+    ]
+  },
+  "signed_off": true
+}

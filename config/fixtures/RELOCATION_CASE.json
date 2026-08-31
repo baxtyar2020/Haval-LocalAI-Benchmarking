@@ -1,0 +1,15 @@
+{
+  "id": "RELOCATION_CASE",
+  "version": "1.0.0",
+  "kind": "text",
+  "budget": 4500,
+  "job": "remote",
+  "commute_alt": "4 miles",
+  "golden": {
+    "must_appear": [
+      "4500",
+      "remote"
+    ]
+  },
+  "signed_off": true
+}

@@ -1,0 +1,15 @@
+{
+  "id": "CREATOR_BRIEF",
+  "version": "1.0.0",
+  "kind": "text",
+  "product": "desk lamp",
+  "audience": "new homeowners",
+  "tone": "warm practical",
+  "golden": {
+    "must_appear": [
+      "lamp",
+      "homeowner"
+    ]
+  },
+  "signed_off": true
+}

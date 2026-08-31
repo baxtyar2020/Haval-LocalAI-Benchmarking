@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "cpu_only_eval_tok_s": {
+    "conservative_max": 12.0,
+    "note": "If a discrete/iGPU accelerator exists and eval tok/s stays at or below this band with size_vram=0, treat as CPU-only fallback."
+  },
+  "probe": {
+            "num_predict": 32,
+    "timeout_s": 20,
+    "prompt": "Reply with a single word: ready.",
+    "fallback_models": ["smollm:135m-instruct-v0.2-q2_K"]
+  },
+  "storage_reserve_gb": 10
+}

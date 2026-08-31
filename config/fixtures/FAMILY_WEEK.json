@@ -1,0 +1,18 @@
+{
+  "id": "FAMILY_WEEK",
+  "version": "1.0.0",
+  "kind": "text",
+  "pickup": "15:30",
+  "budget_cap": 180,
+  "allergy": "peanuts",
+  "school": [
+    "Mon-Fri class"
+  ],
+  "golden": {
+    "must_appear": [
+      "15:30",
+      "peanuts"
+    ]
+  },
+  "signed_off": true
+}

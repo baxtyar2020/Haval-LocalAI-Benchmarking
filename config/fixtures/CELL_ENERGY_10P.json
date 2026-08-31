@@ -1,0 +1,30 @@
+{
+  "id": "CELL_ENERGY_10P",
+  "version": "1.0.0",
+  "kind": "text",
+  "pages": [
+    "Cells convert chemical energy in glucose into ATP, the energy currency of the cell.",
+    "Glycolysis happens in the cytoplasm and does not require oxygen. It yields pyruvate and a little ATP.",
+    "Pyruvate enters mitochondria when oxygen is present.",
+    "The Krebs cycle (citric acid cycle) in the mitochondrial matrix produces NADH and FADH2.",
+    "The electron transport chain sits on the inner mitochondrial membrane.",
+    "Oxygen is the final electron acceptor; water is formed.",
+    "Most ATP is made by oxidative phosphorylation in mitochondria.",
+    "Photosynthesis is a different pathway in chloroplasts and is not the focus of this chapter.",
+    "A common mistake is claiming glycolysis requires oxygen.",
+    "Practice: name ATP, mitochondria, glycolysis, Krebs, and oxygen as the acceptor."
+  ],
+  "golden": {
+    "must_appear": [
+      "ATP",
+      "mitochondria",
+      "glycolysis"
+    ],
+    "quiz_keys": [
+      "ATP",
+      "mitochondria",
+      "glycolysis"
+    ]
+  },
+  "signed_off": true
+}

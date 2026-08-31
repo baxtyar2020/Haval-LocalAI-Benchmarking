@@ -1,0 +1,89 @@
+:root {
+  --canvas: #f6f1e9;
+  --surface: #fbf7ef;
+  --surface-2: #fffdf8;
+  --border: #e6dfd3;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4540;
+  --ink-faint: #8a857d;
+  --accent: #db4f1b;
+  --accent-soft: #f4dcd0;
+  --on-accent: #f6f1e9;
+  --accent-text: #a83b15;
+  --accent-hover: #c54518;
+  --ok: #287653;
+  --ok-bg: #ddede5;
+  --warn: #a76000;
+  --warn-bg: #f7e8c8;
+  --err: #b42318;
+  --err-bg: #f8dfdc;
+  --info: #456a87;
+  --info-bg: #e1eaf0;
+  --neu: #625d57;
+  --neu-bg: #ece6dd;
+  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 6px 18px -8px rgba(26, 26, 26, 0.08);
+  --shadow-elevated: 0 1px 2px rgba(26, 26, 26, 0.04), 0 8px 24px -10px rgba(26, 26, 26, 0.12);
+  --radius-card: 14px;
+  --radius-elevated: 16px;
+  --radius-pill: 999px;
+  --font-sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --ease: 160ms ease;
+  --content-max: 1180px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --canvas: Canvas;
+    --surface: Canvas;
+    --surface-2: Canvas;
+    --border: CanvasText;
+    --ink: CanvasText;
+    --ink-soft: CanvasText;
+    --ink-faint: GrayText;
+    --accent: Highlight;
+    --accent-soft: Canvas;
+    --on-accent: HighlightText;
+    --accent-text: Highlight;
+    --accent-hover: Highlight;
+    --ok: Highlight;
+    --ok-bg: Canvas;
+    --warn: CanvasText;
+    --warn-bg: Canvas;
+    --err: CanvasText;
+    --err-bg: Canvas;
+    --info: Highlight;
+    --info-bg: Canvas;
+    --neu: GrayText;
+    --neu-bg: Canvas;
+    --shadow-card: none;
+    --shadow-elevated: none;
+  }
+
+  .btn,
+  .nav-pill,
+  .status-pill,
+  .icon-btn,
+  .card,
+  .health-pill {
+    outline: 1px solid CanvasText;
+    box-shadow: none !important;
+  }
+
+  .btn.primary {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "GAMEPLAY_TRANSCRIPT",
+  "version": "1.0.0",
+  "kind": "text",
+  "score": "16-14",
+  "lines": [
+    "pistol round loss",
+    "eco round",
+    "clutch site B",
+    "match closes 16-14"
+  ],
+  "golden": {
+    "must_appear": [
+      "16-14"
+    ]
+  },
+  "signed_off": true
+}

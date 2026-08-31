@@ -1,0 +1,31 @@
+{
+  "id": "GAME_CATALOG",
+  "version": "1.0.0",
+  "kind": "catalog",
+  "items": [
+    {
+      "id": "G1",
+      "name": "Stardew Valley",
+      "session": 1
+    },
+    {
+      "id": "G2",
+      "name": "Cozy Farm Lite",
+      "session": 1.5
+    },
+    {
+      "id": "G3",
+      "name": "MMO grind",
+      "session": 8
+    },
+    {
+      "id": "G4",
+      "name": "Local co-op party",
+      "session": 2
+    }
+  ],
+  "golden": {
+    "winner": "G2"
+  },
+  "signed_off": true
+}

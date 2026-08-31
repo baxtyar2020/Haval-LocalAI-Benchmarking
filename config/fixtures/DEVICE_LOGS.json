@@ -1,0 +1,15 @@
+{
+  "id": "DEVICE_LOGS",
+  "version": "1.0.0",
+  "kind": "logs",
+  "events": [
+    {
+      "code": "firmware_0x17",
+      "text": "HID reset loop"
+    }
+  ],
+  "golden": {
+    "root_cause": "firmware_0x17"
+  },
+  "signed_off": true
+}
