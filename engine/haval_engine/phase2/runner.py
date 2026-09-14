@@ -7,6 +7,7 @@ from typing import Callable
 
 from haval_engine.ollama import client as ollama
 from haval_engine.phase2 import load_json
+from haval_engine.paths import locate_node, support_log_path
 from haval_engine.phase2.coding import CODING_PROMPT, grade_coding_js, weighted_coding_pct
 from haval_engine.phase2.parse import math_matches, reasoning_matches, strip_think
 from haval_engine.phase2.validate import validate_instruction_following, validate_structured_output
@@ -101,6 +102,8 @@ def run_quality_pack(
             emit(f"Phase 2 · {label} {i}/{len(items)}", shown, "", False)
             quality_clock = key in _QUALITY_CLOCK
             wall_s = max(1.0, limit_ms / 1000.0) if quality_clock else max(15.0, limit_ms / 1000.0 + 8.0)
+            if think:
+                wall_s *= 3.0
             if key == "structuredOutput":
                 stall_s = wall_s
             elif quality_clock:
@@ -113,7 +116,7 @@ def run_quality_pack(
                 think,
                 cancel,
                 wall_s=wall_s,
-                num_predict=predict,
+                num_predict=4096 if think else predict,
                 stall_s=stall_s,
             )
             text = strip_think(gen.get("text") or "")
@@ -144,7 +147,8 @@ def run_quality_pack(
             else:
                 ok_raw = bool(gen.get("ok")) and checker(text, item)
             if quality_clock:
-                ok = bool(ok_raw)
+                nr_ms = limit_ms * float(load_ruleset().get("speed_ok_multiple") or 1.5)
+                ok = bool(ok_raw) and time_ms < nr_ms
             else:
                 ok = _timed_ok(ok_raw, time_ms, limit_ms)
             if ok:
@@ -192,6 +196,14 @@ def run_quality_pack(
         _limit("structured-output.json"),
         lambda q: (q["prompt"], lambda text, item: validate_structured_output(text, item)),
     )
+    if not locate_node():
+        try:
+            with support_log_path().open("a", encoding="utf-8") as fh:
+                fh.write(
+                    "Phase 2 coding: Node.js was not found. Hidden tests cannot run; coding scores 0.\n"
+                )
+        except OSError:
+            pass
     run_cat(
         "coding",
         _limit("coding.json"),

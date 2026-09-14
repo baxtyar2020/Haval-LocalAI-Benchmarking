@@ -1,75 +1,52 @@
+import { invoke } from "@tauri-apps/api/core";
 import { Icon } from "../components/Icon";
-import type { EngineInfo } from "../types";
-
-type SettingsState = {
-  updates: boolean;
-  telemetry: boolean;
-  hideCmd: boolean;
-  autoSelect: boolean;
-  keepModels: boolean;
-};
+import { COLOR_THEME_CHOICES, type ColorTheme } from "../theme";
+import type { UpdateStatus } from "../update";
 
 type Props = {
-  settings: SettingsState;
-  engine: EngineInfo;
-  engineHealthy: boolean;
-  catalogCount: number;
-  onToggle: (key: keyof SettingsState) => void;
+  reportDir: string;
+  onReportDir: (path: string) => void;
+  colorTheme: ColorTheme;
+  onColorTheme: (theme: ColorTheme) => void;
+  update: UpdateStatus | null;
+  downloadPct: number;
+  onUpdateNow: () => void;
 };
 
-export function SettingsScreen({ settings, engine, engineHealthy, catalogCount, onToggle }: Props) {
-  const groups: {
-    title: string;
-    rows: { title: string; sub: string; kind: "toggle" | "value"; key?: keyof SettingsState; value?: string }[];
-  }[] = [
-    {
-      title: "Application",
-      rows: [
-        { title: "Check for updates automatically", sub: "Notify when a new version is available.", kind: "toggle", key: "updates" },
-        { title: "Theme", sub: "Light theme matched to the Haval identity.", kind: "value", value: "Warm Light" },
-        {
-          title: "Bench Engine",
-          sub: engineHealthy
-            ? `Connected · ${engine.url || "localhost"}`
-            : engine.error || "Not connected — start the desktop app or run the engine locally.",
-          kind: "value",
-          value: engineHealthy ? "Healthy" : "Offline",
-        },
-        {
-          title: "Keyboard",
-          sub: "Alt+1 through Alt+6 switch Home, Doctor, Models, Benchmark, Reports, Settings. Tab moves between controls.",
-          kind: "value",
-          value: "Alt+1–6",
-        },
-        { title: "High Contrast", sub: "Windows High Contrast uses system colors. Reduced motion is respected automatically.", kind: "value", value: "System" },
-      ],
-    },
-    {
-      title: "Ollama",
-      rows: [
-        { title: "Run technical steps hidden", sub: "Never flash PowerShell or command windows.", kind: "toggle", key: "hideCmd" },
-        { title: "API endpoint", sub: "Local service address for the model runtime.", kind: "value", value: "127.0.0.1:11434" },
-      ],
-    },
-    {
-      title: "Models & storage",
-      rows: [
-        { title: "Auto-select preferred models", sub: "Pre-tick Haval Preferred models that fit this PC.", kind: "toggle", key: "autoSelect" },
-        { title: "Keep models after benchmarking", sub: "Do not remove downloaded models automatically.", kind: "toggle", key: "keepModels" },
-        {
-          title: "Preferred catalog",
-          sub: `${catalogCount} Standard Roster models (GPT-OSS 20B is not in the catalog).`,
-          kind: "value",
-          value: `${catalogCount} models`,
-        },
-        { title: "Download location", sub: "Where Ollama stores model weights.", kind: "value", value: "D:\\ollama\\models" },
-      ],
-    },
-    {
-      title: "Privacy & support",
-      rows: [{ title: "Share anonymous diagnostics", sub: "Help improve reliability. No prompts are ever sent.", kind: "toggle", key: "telemetry" }],
-    },
-  ];
+function statusLine(update: UpdateStatus | null, downloadPct: number): string {
+  if (!update) return "Checking…";
+  if (update.state === "downloading") return `Downloading  ${downloadPct}%`;
+  if (update.state === "applying" || update.message.includes("Installer starting")) {
+    return update.message || "Installer starting. This window will close.";
+  }
+  if (update.justUpdated || update.state === "updated") return update.message || `Updated to ${update.installed}.`;
+  if (update.state === "offline") return "No internet — could not check for updates.";
+  if (update.state === "failed") return update.message || "Could not check for updates.";
+  if (update.updateAvailable) return update.notes || "A newer version is ready to install.";
+  return "This PC has the latest version.";
+}
+
+async function pickFolder(current: string): Promise<string | null> {
+  try {
+    const path = await invoke<string | null>("pick_report_folder");
+    return path || null;
+  } catch {
+    const typed = window.prompt("Folder for reports and results", current || "");
+    return typed ? typed.trim() : null;
+  }
+}
+
+export function SettingsScreen({
+  reportDir,
+  onReportDir,
+  colorTheme,
+  onColorTheme,
+  update,
+  downloadPct,
+  onUpdateNow,
+}: Props) {
+  const busy = update?.state === "downloading" || update?.state === "applying";
+  const canUpdate = !!update?.updateAvailable && !busy;
 
   return (
     <div className="page" style={{ maxWidth: 820 }}>
@@ -79,38 +56,107 @@ export function SettingsScreen({ settings, engine, engineHealthy, catalogCount, 
       <h1 className="page-title" style={{ margin: "0 0 26px" }}>
         Preferences
       </h1>
-      {groups.map((g) => (
-        <div key={g.title} style={{ marginBottom: 24 }}>
-          <div className="kicker-muted" style={{ margin: "0 0 12px 2px" }}>
-            {g.title}
-          </div>
-          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-            {g.rows.map((r) => (
-              <div key={r.title} className="setting-row">
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14.5, fontWeight: 600 }}>{r.title}</div>
-                  <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginTop: 2 }}>{r.sub}</div>
-                </div>
-                {r.kind === "toggle" && r.key ? (
-                  <button
-                    className={`toggle${settings[r.key] ? " on" : ""}`}
-                    onClick={() => onToggle(r.key!)}
-                    aria-pressed={settings[r.key]}
-                    aria-label={r.title}
-                  >
-                    <span />
-                  </button>
-                ) : (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 600, padding: "7px 14px", borderRadius: 10, background: "var(--canvas)", border: "1px solid var(--border)" }}>
-                    {r.value}
-                    <Icon name="chevron-down" size={15} style={{ color: "var(--ink-faint)" }} />
-                  </div>
-                )}
-              </div>
-            ))}
+
+      <div className="kicker-muted" style={{ margin: "0 0 12px 2px" }}>
+        Reports
+      </div>
+      <div className="card" style={{ padding: 18, marginBottom: 24 }}>
+        <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>Save reports and results</div>
+        <p className="body" style={{ fontSize: 13, margin: "0 0 14px" }}>
+          The app always keeps a copy. Choose a folder if you also want HTML and spreadsheet files saved there by default.
+        </p>
+        <div className="wizard-folder-path" style={{ marginBottom: 12 }}>
+          <span className="wizard-choice-glyph">
+            <Icon name="folder-open" size={20} />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <div className="kicker-muted" style={{ marginBottom: 4 }}>
+              Default folder
+            </div>
+            <div style={{ fontSize: 13.5, wordBreak: "break-all" }}>
+              {reportDir || "App library only — no extra folder"}
+            </div>
           </div>
         </div>
-      ))}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => {
+              void pickFolder(reportDir).then((path) => {
+                if (path) onReportDir(path);
+              });
+            }}
+          >
+            <Icon name="folder" size={15} />
+            Choose folder
+          </button>
+          {reportDir ? (
+            <button className="btn tertiary" type="button" onClick={() => onReportDir("")}>
+              Clear
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="kicker-muted" style={{ margin: "0 0 12px 2px" }}>
+        Appearance
+      </div>
+      <div className="card" style={{ padding: 16, marginBottom: 24 }}>
+        <div style={{ fontSize: 14.5, fontWeight: 500, marginBottom: 4 }}>Color theme</div>
+        <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 12 }}>
+          Layout stays the same. Only the palette changes. Haval is the default.
+        </div>
+        <div className="theme-picks" role="radiogroup" aria-label="Color theme">
+          {COLOR_THEME_CHOICES.map((choice) => (
+            <button
+              key={choice.id}
+              type="button"
+              role="radio"
+              className={`theme-pick${colorTheme === choice.id ? " on" : ""}`}
+              aria-checked={colorTheme === choice.id}
+              onClick={() => onColorTheme(choice.id)}
+            >
+              <span className="theme-swatches" aria-hidden>
+                <span style={{ background: choice.swatches[0] }} />
+                <span style={{ background: choice.swatches[1] }} />
+              </span>
+              <span className="theme-pick-copy">
+                <strong>{choice.name}</strong>
+                <em>{choice.note}</em>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="kicker-muted" style={{ margin: "0 0 12px 2px" }}>
+        Update
+      </div>
+      <div className="card update-card" style={{ marginBottom: 24 }}>
+        <div className="update-meta">
+          <div>
+            <div className="update-label">Installed</div>
+            <div className="update-value">{update?.installed || "—"}</div>
+          </div>
+          <div>
+            <div className="update-label">Latest</div>
+            <div className="update-value">{update?.latest || "—"}</div>
+          </div>
+        </div>
+        <p className="update-notes">{update?.notes || statusLine(update, downloadPct)}</p>
+        <p className="update-status" role="status">
+          {statusLine(update, downloadPct)}
+        </p>
+        {update?.state === "downloading" ? (
+          <div className="update-bar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={downloadPct}>
+            <span style={{ width: `${downloadPct}%` }} />
+          </div>
+        ) : null}
+        <button className="btn" disabled={!canUpdate} onClick={onUpdateNow}>
+          Update
+        </button>
+      </div>
     </div>
   );
 }

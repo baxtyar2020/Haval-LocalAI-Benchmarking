@@ -4,6 +4,7 @@ target/
 __pycache__/
 *.pyc
 .venv/
+venv/
 _mockup_assets/
 _mockup_unpacked.html
 _extract_*.py
@@ -12,11 +13,37 @@ _make_icons.py
 *.log
 python-embed/
 installer/runtime/python/
+installer/runtime/node/
 app/src-tauri/python/
 portable-app/
 .env
 .env.*
+
+# Product writing, mockups, and ship folders stay on this PC
+/Doc/
+/Planning/
+/What-to-ship final/
+/signing/
+
+# Dev capture and scratch
+app/dev/
+app/help-capture.html
+app/src/helpCapture.tsx
+app/scripts/
+app/step by step.zip
+app/public/app-help-guide/media/*.zip
+app/public/app-help-guide/media/*.gif
+
+# Built installers and other binaries
 *.exe
+*.msi
+*.zip
+*.mp4
+
+What-to-ship final/*.exe
+What-to-ship final/updates/*.exe
+What-to-ship final/updates/latest.json
+What-to-ship final/.first-release-version
 app/src-tauri/icons/android/
 app/src-tauri/icons/ios/
 app/src-tauri/icons/icon-source.png

@@ -1,23 +1,44 @@
 # Haval LocalAI Bench
 
-Windows 11 desktop app that prepares a PC (Doctor), downloads local models through Ollama, runs hardware-first benchmarks, and writes an evidence-based report.
+Windows desktop app that tests **local** AI models on **this PC**. It checks that acceleration works, lets you download models through Ollama, runs real customer jobs across 20 roles (Consumer, Gaming, Commercial), and writes a hardware-first report: which **LLM size** fits this machine for those jobs — not a cloud leaderboard, and not a “best model in the world” contest.
 
-Current tree: M0–M6. Doctor, Model Library, 60-scenario pack, live sequential benchmark, hardware-first HTML report, accessibility/High Contrast pass, crash logging, NSIS resources, and unsigned installer instructions. Authenticode signing is documented, not faked.
+Work stays on the device.
 
-## Layout
+## Read more / Windows installer
 
-- `app/` — Tauri 2 shell + React/TypeScript UI
-- `engine/` — Python 3 Bench Engine (FastAPI on `127.0.0.1`)
-- `config/preferred-models.json` — five-model Standard Roster (Decision D-2; no GPT-OSS 20B)
-- `config/ruleset.json` — taxonomy mapping and scoring constants
-- `config/scenarios.json` — 20 personas × Light/Balanced/Heavy (60 scenarios, ≥3 attempts)
-- `config/fixtures/` — versioned test assets with deterministic goldens
-- HTML reports write to `%LOCALAPPDATA%\Haval LocalAI Bench\runs\<id>\report.html`
-- `Doc/` and `Planning/` — product requirements, architecture, [release checklist](Doc/Release-Checklist.md), [code signing](Doc/Code-Signing.md)
-- `scripts/prepare-python-embed.ps1` — opt-in embeddable CPython download for offline installers
-- `scripts/sign-release.ps1` — Authenticode via `signtool` when a real cert exists
+This repository is the **source** so you can inspect, compile, and run from code.
 
-## Run (desktop)
+If you want the full product write-up, or a **Windows installer** (no compile), use:
+
+**https://havalothman.com/blog/which-local-ai-llm-fits-your-pc**
+
+## What you need to compile (Windows)
+
+- Windows 10/11 (x64)
+- [Node.js](https://nodejs.org/) 20 or newer
+- [Rust](https://rustup.rs/) (stable), then `rustup default stable`
+- [Python](https://www.python.org/) 3.12, with **Add python.exe to PATH**
+- Visual Studio Build Tools with the **Desktop development with C++** workload (for the Rust/Tauri build)
+- [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) (already present on most Windows 11 PCs)
+
+To **run a benchmark** (not required just to compile the UI): install [Ollama](https://ollama.com/) and enough disk for models.
+
+## Run from source
+
+```powershell
+git clone https://github.com/baxtyar2020/Haval-LocalAI-Benchmarking.git
+cd Haval-LocalAI-Benchmarking
+```
+
+Python engine:
+
+```powershell
+cd engine
+python -m pip install -r requirements.txt
+cd ..
+```
+
+Desktop app (starts the engine for you):
 
 ```powershell
 cd app
@@ -25,9 +46,11 @@ npm install
 npm run tauri dev
 ```
 
-The Rust side starts the engine with a hidden window, a random localhost port, and a bearer token. The UI reads that via `engine_info`.
+Or from the repo root: `tauri-dev.bat`.
 
-## Run (UI + engine separately)
+First Tauri build downloads Rust crates and can take several minutes.
+
+### UI and engine in two terminals
 
 ```powershell
 cd engine
@@ -38,32 +61,51 @@ python -m haval_engine
 
 ```powershell
 cd app
+npm install
 npm run dev
 ```
 
-Then open `http://localhost:1420`. Settings → Bench Engine uses the sidecar when launched from Tauri; in browser-only mode it expects the engine on port 8765 with token `dev-local-token`.
+Open `http://localhost:1420`. Browser-only mode expects the engine on port `8765` with token `dev-local-token`.
 
-## Packaged installer (M6)
+## Build the Windows installer
 
-Full customer installer (themed wizard, bundled Python, **Benchmarking** copy):
+From the repository root (internet on the first run: embeddable Python, Node runtime, npm, Rust crates):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File installer\tools\build-installer.ps1
 ```
 
-Layout, wizard pages, and what is / is not bundled: [installer/README.md](installer/README.md).
+Output: `app\src-tauri\target\release\bundle\nsis\`
 
-NSIS output: `app/src-tauri/target/release/bundle/nsis/`. Sign with `scripts/sign-release.ps1` only when you have a real certificate (`Doc/Code-Signing.md`). Lab steps: `Doc/Release-Checklist.md`.
+That command is for people compiling this repo. Ready-made setup EXEs are not stored here. Download those from the article above.
 
-Shell-only bundle without the Python runtime (developers):
+UI-only Tauri bundle (no bundled Python/Node — not the customer installer):
 
 ```powershell
 cd app
 npm run tauri build
 ```
 
-## Engine API (M0–M6)
+## Layout
 
-`GET /health` · `GET /models/preferred` · `GET /models/library` · `POST /models/downloads` · `POST /models/select` · `GET /settings` · `GET /doctor/status` · `POST /doctor/run` · `POST /doctor/repair` · `GET /doctor/events` · `GET /bench/readiness` · `GET /pack/scenarios` · `GET /pack/fixtures` · `POST /bench/start` · `POST /bench/pause` · `POST /bench/stop` · `GET /bench/status` · `GET /bench/runs` · `POST /reports/{id}/render` · `GET /reports/{id}/html` · `GET /reports/{id}/paths`
+| Path | What it is |
+|---|---|
+| `app/` | Tauri 2 + React UI |
+| `engine/` | Python bench engine (localhost) |
+| `config/` | Personas, scenarios, fixtures, scoring rules, preferred models |
+| `installer/` | NSIS wizard, assets, and the full pack script |
+| `scripts/` | Optional Python embed + Authenticode after you have a real cert |
+| `LICENSE` | Terms for this source |
 
-All routes require `Authorization: Bearer <token>`. Doctor locates and starts Ollama with hidden windows, proves acceleration with a small live probe, and keeps **Start Benchmark** disabled until the environment is ready and at least one library model is selected. The Model Library inventories Ollama, shows the five preferred models, searches the registry, and downloads sequentially. A benchmark run is **20 personas × Light/Balanced/Heavy = 60 scenarios**, each attempted **3 times**, models sequential. Results go to `%LOCALAPPDATA%\Haval LocalAI Bench\runs\`.
+Reports on a machine that has run the app: `%LOCALAPPDATA%\Haval LocalAI Bench\runs\`
+
+## Tests (engine)
+
+```powershell
+cd engine
+python -m pytest
+```
+
+## License
+
+See [`LICENSE`](LICENSE).

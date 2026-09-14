@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Columns2,
   CircuitBoard,
   CircleCheck,
   Clapperboard,
@@ -70,6 +72,7 @@ import {
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
+  activity: Activity,
   "alert-triangle": AlertTriangle,
   "arrow-left": ArrowLeft,
   "arrow-right": ArrowRight,
@@ -89,6 +92,7 @@ const ICONS: Record<string, LucideIcon> = {
   "circle-check": CircleCheck,
   clapperboard: Clapperboard,
   "code-2": Code2,
+  "columns-2": Columns2,
   cpu: Cpu,
   download: Download,
   "external-link": ExternalLink,
@@ -148,5 +152,5 @@ type Props = {
 
 export function Icon({ name, size = 16, className, style }: Props) {
   const Cmp = ICONS[name] ?? Box;
-  return <Cmp size={size} strokeWidth={1.65} className={className} style={style} aria-hidden />;
+  return <Cmp size={size} strokeWidth={2.5} className={className} style={style} aria-hidden />;
 }

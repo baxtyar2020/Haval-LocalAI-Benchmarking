@@ -1,6 +1,6 @@
 [package]
 name = "haval-localai-bench"
-version = "0.1.0"
+version = "0.1.5"
 description = "Haval LocalAI Benchmarking — Windows desktop evaluation app"
 authors = ["Haval Othman"]
 license-file = "../../LICENSE"
@@ -27,4 +27,5 @@ portpicker = "0.1"
 rfd = "0.15"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sha2 = "0.10"
 

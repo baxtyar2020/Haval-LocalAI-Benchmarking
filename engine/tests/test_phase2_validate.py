@@ -40,9 +40,9 @@ def test_coding_score_is_difficulty_weighted():
 
 
 def test_coding_vm_matches_hidden_tests():
-    import shutil
+    from haval_engine.paths import locate_node
 
-    if not shutil.which("node"):
+    if not locate_node():
         return
     add = {
         "functionName": "add",

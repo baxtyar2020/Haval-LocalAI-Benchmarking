@@ -4,6 +4,11 @@ import { Icon } from "./Icon";
 import { WizardArtModel, WizardArtPeople, WizardArtReport, WizardArtThink, WIZARD_STEPS } from "./WizardArt";
 import { BUSINESSES, PERSONA_CHOICES, PERSONA_ICONS, type BusinessId } from "../personaCatalog";
 import type { LibraryItem } from "../types";
+import screen1 from "../assets/wizard/screen1.png";
+import screen2 from "../assets/wizard/screen2.png";
+import screen3 from "../assets/wizard/screen3.png";
+import screen4 from "../assets/wizard/screen4.png";
+import screen5 from "../assets/wizard/screen5.png";
 
 export type WizardLaunch = {
   model: string;
@@ -16,8 +21,14 @@ type Props = {
   models: LibraryItem[];
   defaultModel?: string;
   defaultThinking: boolean;
+  defaultReportDir?: string | null;
   onCancel: () => void;
   onLaunch: (opts: WizardLaunch) => void;
+  onGoToModels: () => void;
+  onSearchModels: () => void;
+  /** Skip illustrated intro and show a setup step (used for in-app screenshots). */
+  previewWork?: boolean;
+  previewStep?: number;
 };
 
 const TITLES = [
@@ -34,13 +45,95 @@ const BLURBS = [
   "We always keep a copy in the app. Optionally save another copy in a folder you choose.",
 ];
 
-export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, onLaunch }: Props) {
+const STEP_ART = [screen1, screen2, screen3, screen4];
+
+type BriefLine = { icon: string; text: string; tone?: "ink" | "accent" | "ok" | "warn" };
+
+type BriefCopy = {
+  kicker: string;
+  title: string;
+  mark: string;
+  lines: BriefLine[];
+};
+
+const BRIEF_COPY: BriefCopy[] = [
+  {
+    kicker: "Step 1 · Your model",
+    title: "Choose the model to test",
+    mark: "sparkles",
+    lines: [
+      { icon: "download", tone: "accent", text: "Pick any LLM you already downloaded." },
+      { icon: "box", text: "You can select any model on your list. Use the one you want to run the benchmark." },
+    ],
+  },
+  {
+    kicker: "Step 2 · Who it is for",
+    title: "Choose your personas",
+    mark: "users",
+    lines: [
+      { icon: "user-round", text: "A persona is a real customer role and use case. It is how that person uses AI in daily work or life." },
+      { icon: "sparkles", tone: "accent", text: "All 20 personas start selected. That is the default." },
+      { icon: "list-checks", text: "You can clear a whole segment, then keep only the ones you want." },
+      { icon: "users", text: "You can also mix personas from different segments. That is up to you." },
+      { icon: "check", text: "Tap a role to select or unselect it." },
+      { icon: "arrow-right", tone: "ok", text: "On the next screen, scroll down to see every role." },
+    ],
+  },
+  {
+    kicker: "Step 3 · Speed vs thinking",
+    title: "Thinking on or off?",
+    mark: "brain",
+    lines: [
+      { icon: "gauge", text: "Most industry benchmarks leave thinking off." },
+      { icon: "zap", tone: "accent", text: "Here, thinking is off by default as well." },
+      { icon: "timer", tone: "warn", text: "When thinking is on, the model can take 3 times longer — sometimes more." },
+      { icon: "shield-alert", text: "Do not turn it on unless you have a very specific reason." },
+    ],
+  },
+  {
+    kicker: "Step 4 · Your report",
+    title: "Save the final report (optional)",
+    mark: "folder-open",
+    lines: [
+      { icon: "scroll-text", text: "The app already saves the report in the default place." },
+      { icon: "folder", text: "If you want a second copy, pick another folder on the next screen." },
+      { icon: "play", tone: "ok", text: "If you do not need that, leave it blank and tap Start. Then just click Start benchmark." },
+    ],
+  },
+];
+
+const EMPTY_COPY: BriefCopy = {
+  kicker: "Need a model first",
+  title: "No model to test yet",
+  mark: "boxes",
+  lines: [
+    { icon: "alert-triangle", tone: "warn", text: "The benchmark needs at least one installed model." },
+    { icon: "boxes", text: "Go back to Models and download one from the preferred list." },
+    { icon: "search", text: "You can also search for a model yourself, then download it." },
+    { icon: "sparkles", tone: "ok", text: "When a model is on your list, come back here and start the guide again." },
+  ],
+};
+
+export function BenchWizard({
+  models,
+  defaultModel,
+  defaultThinking: _defaultThinking,
+  defaultReportDir,
+  onCancel,
+  onLaunch,
+  onGoToModels,
+  onSearchModels,
+  previewWork = false,
+  previewStep = 0,
+}: Props) {
   const installed = models.filter((m) => m.installed);
-  const [step, setStep] = useState(0);
+  const empty = installed.length === 0;
+  const [brief, setBrief] = useState(!previewWork);
+  const [step, setStep] = useState(previewStep);
   const [model, setModel] = useState(defaultModel || installed[0]?.name || "");
   const [picked, setPicked] = useState<Set<string>>(() => new Set(PERSONA_CHOICES.map((p) => p.name)));
-  const [thinking, setThinking] = useState(defaultThinking);
-  const [folder, setFolder] = useState<string | null>(null);
+  const [thinking, setThinking] = useState(false);
+  const [folder, setFolder] = useState<string | null>(defaultReportDir || null);
 
   const byBiz = useMemo(() => {
     const map: Record<BusinessId, typeof PERSONA_CHOICES> = { Consumer: [], Gaming: [], Commercial: [] };
@@ -48,7 +141,19 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
     return map;
   }, []);
 
-  const canNext = step === 0 ? Boolean(model) : step === 1 ? picked.size > 0 : true;
+  const selectedModel = installed.some((m) => m.name === model) ? model : installed[0]?.name || "";
+  const canNext = step === 0 ? Boolean(selectedModel) : step === 1 ? picked.size > 0 : true;
+  const allCount = PERSONA_CHOICES.length;
+  const allPicked = picked.size === allCount;
+  const nonePicked = picked.size === 0;
+
+  function selectAllPersonas() {
+    setPicked(new Set(PERSONA_CHOICES.map((p) => p.name)));
+  }
+
+  function deselectAllPersonas() {
+    setPicked(new Set());
+  }
 
   function togglePersona(name: string) {
     setPicked((prev) => {
@@ -81,7 +186,84 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
     }
   }
 
+  function backFromWork() {
+    setBrief(true);
+  }
+
+  function nextFromWork() {
+    if (step < 3) {
+      setStep((s) => s + 1);
+      setBrief(true);
+      return;
+    }
+    if (!selectedModel || picked.size < 1) return;
+    onLaunch({
+      model: selectedModel,
+      personas: PERSONA_CHOICES.map((p) => p.name).filter((n) => picked.has(n)),
+      thinking,
+      report_dir: folder,
+    });
+  }
+
+  function backFromBrief() {
+    if (step === 0) {
+      onCancel();
+      return;
+    }
+    setStep((s) => s - 1);
+    setBrief(false);
+  }
+
   const Art = [WizardArtModel, WizardArtPeople, WizardArtThink, WizardArtReport][step];
+
+  if (empty || brief) {
+    const copy = empty ? EMPTY_COPY : BRIEF_COPY[step];
+    const art = empty ? screen5 : STEP_ART[step];
+    return (
+      <div
+        className={`wizard-brief${empty ? " wizard-brief-empty" : ` wizard-brief-s${step}`}`}
+        role="dialog"
+        aria-labelledby="wizard-brief-title"
+      >
+        <img className="wizard-brief-art" src={art} alt="" />
+        <div className="wizard-brief-dock">
+          <div className="wizard-brief-kicker">{copy.kicker}</div>
+          <h1 className="wizard-brief-title" id="wizard-brief-title">
+            {copy.title}
+          </h1>
+          <p className="wizard-brief-copy">
+            {copy.lines.map((line, i) => (
+              <span key={line.text} className={`tone-${line.tone || "ink"}`} style={{ animationDelay: `${120 + i * 160}ms` }}>
+                {line.text}{" "}
+              </span>
+            ))}
+          </p>
+          <div className="wizard-brief-actions">
+            <button type="button" className="btn tertiary" onClick={empty ? onCancel : backFromBrief}>
+              Back
+            </button>
+            {empty ? (
+              <>
+                <button type="button" className="btn secondary" onClick={onSearchModels}>
+                  <Icon name="search" size={16} />
+                  Search for a model
+                </button>
+                <button type="button" className="btn primary" onClick={onGoToModels}>
+                  <Icon name="boxes" size={16} />
+                  Go to Models
+                </button>
+              </>
+            ) : (
+              <button type="button" className="btn primary" onClick={() => setBrief(false)}>
+                OK, let’s go
+                <Icon name="arrow-right" size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page wizard-page">
@@ -99,7 +281,10 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
             <button
               type="button"
               className={`wizard-rail-btn${i === step ? " on" : i < step ? " done" : ""}`}
-              onClick={() => setStep(i)}
+              onClick={() => {
+                setStep(i);
+                setBrief(false);
+              }}
               disabled={i > step + 1 || (i === step + 1 && !canNext)}
             >
               <span className="wizard-rail-icon">
@@ -145,41 +330,69 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
               </>
             )}
           </div>
+          {step === 1 ? (
+            <div className="wizard-persona-bulk">
+              <div className="wizard-persona-bulk-count">
+                {picked.size} of {allCount} personas
+              </div>
+              <button type="button" className="btn secondary wizard-persona-bulk-btn" disabled={allPicked} onClick={selectAllPersonas}>
+                <Icon name="list-checks" size={15} />
+                Select all {allCount}
+              </button>
+              <button type="button" className="btn secondary wizard-persona-bulk-btn" disabled={nonePicked} onClick={deselectAllPersonas}>
+                <Icon name="x" size={15} />
+                Deselect all {allCount}
+              </button>
+            </div>
+          ) : null}
+          <div className="wizard-nav wizard-nav-art">
+            <button type="button" className="btn tertiary" onClick={backFromWork}>
+              <Icon name="arrow-left" size={16} />
+              Back
+            </button>
+            {step < 3 ? (
+              <button type="button" className="btn primary" disabled={!canNext} onClick={nextFromWork}>
+                Next
+                <Icon name="arrow-right" size={16} />
+              </button>
+            ) : (
+              <button type="button" className="btn primary" disabled={!selectedModel || picked.size < 1} onClick={nextFromWork}>
+                <Icon name="play" size={16} />
+                Start benchmark
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="wizard-panel">
           {step === 0 ? (
-            installed.length ? (
-              <div className="wizard-list">
-                {installed.map((m) => {
-                  const on = model === m.name;
-                  return (
-                    <button key={m.name} type="button" className={`wizard-choice${on ? " on" : ""}`} onClick={() => setModel(m.name)}>
-                      <span className="wizard-choice-glyph">
-                        <Icon name="box" size={22} />
-                      </span>
-                      <span>
-                        <strong>{m.display_name || m.name}</strong>
-                        <em>
-                          {m.params_total && m.params_total !== "—" ? (
-                            <>
-                              <strong>{m.params_total}</strong> total · <strong>{m.params_active || m.params_total}</strong> active
-                            </>
-                          ) : (
-                            m.params || m.tag || "Installed"
-                          )}
-                          {m.quant ? ` · ${m.quant}` : ""}
-                          {m.size_label ? ` · ${m.size_label}` : ""}
-                        </em>
-                      </span>
-                      <span className={`checkbox${on ? " on" : ""}`}>{on ? <Icon name="check" size={14} /> : null}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="body">Install a model in the Model Library first, then come back here.</p>
-            )
+            <div className="wizard-list">
+              {installed.map((m) => {
+                const on = selectedModel === m.name;
+                return (
+                  <button key={m.name} type="button" className={`wizard-choice${on ? " on" : ""}`} onClick={() => setModel(m.name)}>
+                    <span className="wizard-choice-glyph">
+                      <Icon name="box" size={22} />
+                    </span>
+                    <span>
+                      <strong>{m.display_name || m.name}</strong>
+                      <em>
+                        {m.params_total && m.params_total !== "—" ? (
+                          <>
+                            <strong>{m.params_total}</strong> total · <strong>{m.params_active || m.params_total}</strong> active
+                          </>
+                        ) : (
+                          m.params || m.tag || "Installed"
+                        )}
+                        {m.quant ? ` · ${m.quant}` : ""}
+                        {m.size_label ? ` · ${m.size_label}` : ""}
+                      </em>
+                    </span>
+                    <span className={`checkbox${on ? " on" : ""}`}>{on ? <Icon name="check" size={14} /> : null}</span>
+                  </button>
+                );
+              })}
+            </div>
           ) : null}
 
           {step === 1
@@ -232,7 +445,7 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
                   <Icon name="zap" size={22} />
                 </span>
                 <span>
-                  <strong>Thinking off</strong>
+                  <strong>Thinking Off</strong>
                   <em>Straight to the answer. Faster. A good default for this bench.</em>
                 </span>
                 <span className={`checkbox${thinking === false ? " on" : ""}`}>{thinking === false ? <Icon name="check" size={14} /> : null}</span>
@@ -242,7 +455,7 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
                   <Icon name="lightbulb" size={22} />
                 </span>
                 <span>
-                  <strong>Thinking on</strong>
+                  <strong>Thinking On</strong>
                   <em>It may work the problem out first. Often slower. We still wait until it finishes.</em>
                 </span>
                 <span className={`checkbox${thinking ? " on" : ""}`}>{thinking ? <Icon name="check" size={14} /> : null}</span>
@@ -284,35 +497,30 @@ export function BenchWizard({ models, defaultModel, defaultThinking, onCancel, o
       </div>
 
       <div className="wizard-nav">
-        <button type="button" className="btn tertiary" onClick={onCancel}>
+        <button type="button" className="btn tertiary" onClick={backFromWork}>
           <Icon name="arrow-left" size={16} />
-          Back to Benchmark
+          Back
         </button>
         <div style={{ display: "flex", gap: 10 }}>
           {step > 0 ? (
-            <button type="button" className="btn secondary" onClick={() => setStep((s) => s - 1)}>
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => {
+                setStep((s) => s - 1);
+                setBrief(false);
+              }}
+            >
               Previous
             </button>
           ) : null}
           {step < 3 ? (
-            <button type="button" className="btn primary" disabled={!canNext} onClick={() => setStep((s) => s + 1)}>
+            <button type="button" className="btn primary" disabled={!canNext} onClick={nextFromWork}>
               Next
               <Icon name="arrow-right" size={16} />
             </button>
           ) : (
-            <button
-              type="button"
-              className="btn primary"
-              disabled={!model || picked.size < 1}
-              onClick={() =>
-                onLaunch({
-                  model,
-                  personas: PERSONA_CHOICES.map((p) => p.name).filter((n) => picked.has(n)),
-                  thinking,
-                  report_dir: folder,
-                })
-              }
-            >
+            <button type="button" className="btn primary" disabled={!selectedModel || picked.size < 1} onClick={nextFromWork}>
               <Icon name="play" size={16} />
               Start benchmark
             </button>

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
 
+from haval_engine.paths import locate_node
 from haval_engine.winproc import run_hidden
 
 SANDBOX_TIMEOUT_MS = 5000
@@ -34,7 +34,7 @@ def run_coding_tests(text: str, item: dict) -> dict:
     """Run hidden tests in an isolated Node vm."""
     total = len(item.get("tests") or [])
     empty = {"passed": 0, "total": total, "all_passed": False}
-    node = shutil.which("node")
+    node = locate_node()
     if not node or not sandbox_path().is_file():
         return empty
     payload = json.dumps(
@@ -49,7 +49,7 @@ def run_coding_tests(text: str, item: dict) -> dict:
     )
     try:
         result = run_hidden(
-            [node, str(sandbox_path())],
+            [str(node), str(sandbox_path())],
             timeout=isolated_wall_s(item) + 2,
             input_text=payload,
         )

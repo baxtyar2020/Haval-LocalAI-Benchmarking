@@ -18,9 +18,34 @@ def test_finish_three_attempts():
 def test_speed_bands():
     assert speed_band(7, 10) == "Fast"
     assert speed_band(10, 10) == "Fast"
-    assert speed_band(15, 10) == "OK"
-    assert speed_band(25, 10) == "Slow"
+    assert speed_band(13, 10) == "OK"
+    assert speed_band(14, 10) == "OK"
+    assert speed_band(15, 10) == "Slow"
+    assert speed_band(20, 10) == "Slow"
     assert speed_band(None, 10) == "—"
+
+
+def test_role_speed_first_look_stops_at_fast():
+    from haval_engine.scoring.pipeline import role_speed_band
+
+    # Everyday Organizer: expected avg 53.3s. Real report times.
+    assert role_speed_band([42, 53, 23], [25, 45, 90], heavy_actual=23) == "Fast"
+    # Average over expected, but Heavy still under the average expected.
+    assert role_speed_band([80, 80, 40], [25, 45, 90], heavy_actual=40) == "Fast"
+
+
+def test_role_speed_second_look():
+    from haval_engine.scoring.pipeline import role_speed_band
+
+    expected = [25, 45, 90]  # avg 53.3; 1.5× ≈ 80; 2× ≈ 107
+    assert role_speed_band([70, 80, 60], expected, heavy_actual=60) == "Fast"
+    assert role_speed_band([90, 95, 85], expected, heavy_actual=85) == "OK"
+    assert role_speed_band([120, 130, 110], expected, heavy_actual=110) == "Slow"
+
+
+def test_slow_at_1_5x_is_not_recommended():
+    assert match_label(finish=100, answer=92, speed="Slow") == "Not Recommended"
+    assert match_label(finish=100, answer=92, speeds=["Fast", "OK", "Slow"]) == "Not Recommended"
 
 
 def test_phase1_slow_perfect_is_not_excellent():
@@ -37,8 +62,8 @@ def test_phase1_slow_perfect_is_not_excellent():
         tok_s=[40, 40, 40],
     )
     assert score is not None
-    assert score < 62
-    assert match_label(finish=100, answer=score) in {"Acceptable", "Marginal Match", "Not Recommended"}
+    assert score < 48
+    assert match_label(finish=100, answer=score, speed="Slow") == "Not Recommended"
 
 
 def test_phase1_failed_content_not_rescued_by_speed():

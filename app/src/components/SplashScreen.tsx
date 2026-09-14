@@ -32,18 +32,19 @@ export function SplashScreen({ snapshot, waitingForEngine }: Props) {
     <div className="splash" role="status" aria-live="polite" aria-busy="true" aria-label="Opening Haval LocalAI Benchmarking">
       <div className="splash-photo-wrap">
         <img className="splash-photo" src={splashPhoto} alt="" />
-        <div className="splash-photo-veil" />
       </div>
-      <div className="splash-card">
-        <div className="splash-card-shine" aria-hidden="true" />
-        <div className="splash-kicker">Haval LocalAI Benchmarking</div>
-        <h1 className="splash-title">Preparing your PC</h1>
-        <p className="splash-copy">Doctor is confirming Windows, Ollama, storage, and acceleration before you start.</p>
-      </div>
-      <div className="splash-footer">
-        <div className="splash-progress-label">{label}</div>
-        <div className="splash-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={label}>
-          <div className="splash-progress-fill" style={{ width: `${pct}%` }} />
+      <div className="splash-dock">
+        <div className="splash-card">
+          <div className="splash-card-shine" aria-hidden="true" />
+          <div className="splash-kicker">Haval LocalAI Benchmarking</div>
+          <h1 className="splash-title">Preparing your PC</h1>
+          <p className="splash-copy">Doctor is confirming Windows, Ollama, storage, and acceleration before you start.</p>
+        </div>
+        <div className="splash-footer">
+          <div className="splash-progress-label">{label}</div>
+          <div className="splash-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={label}>
+            <div className="splash-progress-fill" style={{ width: `${pct}%` }} />
+          </div>
         </div>
       </div>
     </div>

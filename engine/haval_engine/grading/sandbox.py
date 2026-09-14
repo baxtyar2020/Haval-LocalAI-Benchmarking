@@ -5,6 +5,7 @@ import re
 import tempfile
 from pathlib import Path
 
+from haval_engine.paths import locate_python
 from haval_engine.winproc import run_hidden
 
 
@@ -81,7 +82,10 @@ def run_python_snippet(
         path = Path(tmp) / "snippet.py"
         path.write_text(full, encoding="utf-8")
         try:
-            result = run_hidden(["python", "-I", str(path)], timeout=timeout, cwd=Path(tmp))
+            python = locate_python()
+            if not python:
+                return {"ok": False, "error": "python_runtime_missing"}
+            result = run_hidden([str(python), "-I", str(path)], timeout=timeout, cwd=Path(tmp))
         except Exception as exc:
             return {"ok": False, "error": str(exc)}
     if result.returncode != 0:

@@ -55,7 +55,6 @@ async def doctor_events(request: Request) -> StreamingResponse:
                 except TimeoutError:
                     yield "data: {\"ping\": true}\n\n"
         finally:
-            if push in SERVICE._listeners:
-                SERVICE._listeners.remove(push)
+            SERVICE.unsubscribe(push)
 
     return StreamingResponse(gen(), media_type="text/event-stream")

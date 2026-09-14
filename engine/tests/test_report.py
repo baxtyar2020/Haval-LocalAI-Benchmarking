@@ -29,7 +29,7 @@ def test_report_has_twenty_personas_and_no_invented_copy():
         assert persona.replace("&", "&amp;") in html
     assert "Everyday Organizer" in html
     assert "Failed" in html
-    assert "not invented" in html.lower() or "not invented" in html
+    assert "Why this run failed" in html
     assert "Finish" in html
     assert "Q^0.60" not in html
     assert "Hardware zone" not in html
@@ -86,9 +86,9 @@ def test_report_slow_perfect_answer_is_not_excellent():
     ]
     ctx = build_context(run, scores, [], {"cpu": "Test CPU", "gpu": "Test GPU", "ram_gb": 32})
     organizer = next(p for p in ctx["models"][0]["personas"] if p["persona"] == "Everyday Organizer")
-    assert organizer["overall"] == "48"
-    assert organizer["final"] == "Marginal Match"
-    assert ctx["models"][0]["businesses"]["Consumer"]["customer"] == "Marginal Match"
+    assert organizer["overall"] == "24"
+    assert organizer["final"] == "Not Recommended"
+    assert ctx["models"][0]["businesses"]["Consumer"]["customer"] == "Not Recommended"
     html = render_html(ctx)
     assert "Phase 2" in html
     assert "multilingual" in html.lower()
@@ -172,6 +172,30 @@ def test_persona_light_cell_is_mmss_not_score():
     assert "Fast" not in organizer["light"]
 
 
+def test_report_role_time_uses_average_not_light_alone():
+    run = {
+        "id": "role-time-run",
+        "status": "completed",
+        "models_json": '["gemma4:26b"]',
+        "summary_json": json.dumps({"thinking": False, "personas": ["Everyday Organizer"]}),
+    }
+    scores = [
+        {"model": "gemma4:26b", "scenario_id": "C-EO-L", "q": 100, "r": 100, "internal": "Slow", "successful": 1, "attempted": 1},
+        {"model": "gemma4:26b", "scenario_id": "C-EO-B", "q": 100, "r": 100, "internal": "OK", "successful": 1, "attempted": 1},
+        {"model": "gemma4:26b", "scenario_id": "C-EO-H", "q": 100, "r": 100, "internal": "Fast", "successful": 1, "attempted": 1},
+    ]
+    attempts = [
+        {"model": "gemma4:26b", "scenario_id": "C-EO-L", "ok": 1, "total_s": 42, "q": 100},
+        {"model": "gemma4:26b", "scenario_id": "C-EO-B", "ok": 1, "total_s": 53, "q": 100},
+        {"model": "gemma4:26b", "scenario_id": "C-EO-H", "ok": 1, "total_s": 23, "q": 100},
+    ]
+    ctx = build_context(run, scores, attempts, {"cpu": "Test CPU", "gpu": "Test GPU", "ram_gb": 32})
+    organizer = next(p for p in ctx["models"][0]["personas"] if p["persona"] == "Everyday Organizer")
+    assert organizer["role_speed"] == "Fast"
+    assert organizer["final"] != "Not Recommended"
+    assert organizer["final"] != "Failed"
+
+
 def test_report_lists_only_selected_personas():
     run = {
         "id": "subset-run",
@@ -209,4 +233,96 @@ def test_report_lists_only_selected_personas():
     assert "Engineer &amp; Software Developer" in html
     assert "Casual Gamer" not in html
     assert "Student &amp; Learner" not in html
+
+
+def test_failed_run_html_explains_why():
+    run = {
+        "id": "fail-400",
+        "status": "completed",
+        "models_json": '["qwen3-coder:30b"]',
+        "summary_json": json.dumps({"thinking": True}),
+    }
+    attempts = [
+        {
+            "model": "qwen3-coder:30b",
+            "ok": 0,
+            "error": "HTTP 400: Bad Request",
+            "total_s": 0.012,
+        }
+        for _ in range(3)
+    ]
+    ctx = build_context(run, [], attempts, {"cpu": "Test CPU", "gpu": "Test GPU", "ram_gb": 32})
+    html = render_html(ctx)
+    assert ctx["models"][0]["failed"] is True
+    assert "thinking turned on" in (ctx["models"][0]["fail_reason"] or "").lower()
+    assert "thinking turned on" in html.lower()
+    assert "HTTP 400" not in html
+    assert "Why this run failed" in html
+
+
+def test_failed_run_html_explains_hardware():
+    run = {
+        "id": "fail-oom",
+        "status": "completed",
+        "models_json": '["qwen3:235b"]',
+        "summary_json": "{}",
+    }
+    attempts = [
+        {
+            "model": "qwen3:235b",
+            "ok": 0,
+            "error": "ggml_gallocr: failed to allocate, out of memory",
+            "total_s": 0.4,
+        }
+    ]
+    ctx = build_context(run, [], attempts, {"cpu": "Test CPU", "gpu": "Test GPU", "ram_gb": 32})
+    html = render_html(ctx)
+    reason = ctx["models"][0]["fail_reason"] or ""
+    assert "too large for this PC" in reason
+    assert "smaller model" in reason.lower()
+    assert "too large for this PC" in html
+    assert "fail-banner" in html
+    assert "cuda" not in html.lower()
+    assert "ggml" not in html.lower()
+
+
+def test_failed_run_html_explains_too_slow():
+    run = {
+        "id": "fail-slow",
+        "status": "completed",
+        "models_json": '["gemma4:26b"]',
+        "summary_json": json.dumps(
+            {
+                "thinking": False,
+                "personas": ["Everyday Organizer"],
+                "models": [
+                    {
+                        "model": "gemma4:26b",
+                        "fail": {
+                            "kind": "too_slow",
+                            "headline": "This model can run on this PC, but it is too slow for every role you selected. That wait is not acceptable for those roles.",
+                            "message": "This model can run on this PC, but it is too slow for every role you selected. That wait is not acceptable for those roles.",
+                        },
+                    }
+                ],
+            }
+        ),
+    }
+    scores = [
+        {
+            "model": "gemma4:26b",
+            "scenario_id": "C-EO-L",
+            "persona": "Everyday Organizer",
+            "q": 90,
+            "r": 100,
+            "internal": "Slow",
+            "successful": 1,
+            "attempted": 1,
+        }
+    ]
+    ctx = build_context(run, scores, [], {"cpu": "Test CPU", "gpu": "Test GPU", "ram_gb": 32})
+    html = render_html(ctx)
+    assert ctx["models"][0]["failed"] is True
+    assert ctx["models"][0]["fail_kind"] == "too_slow"
+    assert "too slow for every role" in html.lower()
 

@@ -12,7 +12,8 @@ from haval_engine.ollama import install as ollama_install
 from haval_engine.ollama.process import start_ollama, stop_stale_ollama
 from haval_engine.ollama.runtime import locate
 from haval_engine.doctor.probe_model import DEFAULT_PROBE_MODEL, is_hidden_probe_model, pick_probe_model
-from haval_engine.paths import config_dir, snapshot_path, support_log_path
+from haval_engine.paths import config_dir, locate_node, locate_python, snapshot_path, support_log_path
+from haval_engine.winproc import run_hidden
 
 Check = dict[str, Any]
 Listener = Callable[[dict], None]
@@ -103,11 +104,18 @@ class DoctorService:
             self._refresh_overall()
 
     def subscribe(self, listener: Listener) -> None:
-        self._listeners.append(listener)
+        with self._lock:
+            self._listeners.append(listener)
+
+    def unsubscribe(self, listener: Listener) -> None:
+        with self._lock:
+            self._listeners = [item for item in self._listeners if item is not listener]
 
     def _emit(self) -> None:
         snap = self.snapshot()
-        for listener in list(self._listeners):
+        with self._lock:
+            listeners = list(self._listeners)
+        for listener in listeners:
             try:
                 listener(snap)
             except Exception:
@@ -261,6 +269,7 @@ class DoctorService:
         checks: list[Check] = [
             _check("windows", "Windows 11", "Checking Windows version…", "checking", blocking=True),
             _check("runtime", "Application runtime", "Checking Visual C++ components…", "checking"),
+            _check("scoring", "Hidden-test runtimes", "Checking bundled Node and Python…", "checking", blocking=True),
             _check("hardware", "Hardware", "Detecting CPU, GPU, and memory…", "checking"),
             _check("ollama_exe", "Ollama installed", "Searching standard and custom locations…", "checking", blocking=True),
             _check("ollama_api", "Ollama service", "Checking the local API…", "checking", blocking=True),
@@ -277,6 +286,37 @@ class DoctorService:
         vok, vdetail = hardware.vcpp_present()
         _log(f"vcpp: {vdetail}")
         self._mark(checks, "runtime", detail=vdetail, status="passed" if vok else "warning")
+
+        py = locate_python()
+        node = locate_node()
+        scoring_parts: list[str] = []
+        scoring_ok = True
+        if py:
+            scoring_parts.append(f"Python at {py}")
+        else:
+            scoring_ok = False
+            scoring_parts.append("bundled Python is missing")
+        if node:
+            node_label = "Node"
+            try:
+                ver = run_hidden([str(node), "-v"], timeout=8)
+                node_label = (ver.stdout or ver.stderr or "").strip() or "Node"
+            except Exception:
+                pass
+            scoring_parts.append(f"{node_label} at {node}")
+        else:
+            scoring_ok = False
+            scoring_parts.append("Node.js is missing — Phase 2 coding hidden tests would score 0")
+        scoring_detail = "; ".join(scoring_parts)
+        _log(f"scoring runtimes: {scoring_detail}")
+        self._mark(
+            checks,
+            "scoring",
+            detail=scoring_detail if scoring_ok else (
+                "Reinstall from the Haval setup package so Node and Python ship with the app. " + scoring_detail
+            ),
+            status="passed" if scoring_ok else "failed",
+        )
 
         hw = hardware.hardware_snapshot()
         self.hardware = hw

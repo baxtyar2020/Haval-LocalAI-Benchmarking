@@ -45,9 +45,10 @@ def test_forty_sixty_and_explicit_g_rd_h():
     assert g["weights"] == {"P": 0.40, "R": 0.25, "I": 0.20, "S": 0.15}
 
 
-def test_writer_heavy_ok_window_is_three_minutes_not_ten():
+def test_writer_heavy_nr_and_wall_windows():
     row = next(r for r in scenarios() if r["id"] == "C-WC-H")
     assert row["total_s"] == 90
+    assert row["total_s"] * 1.5 == 135
     assert row["total_s"] * 2 == 180
 
 

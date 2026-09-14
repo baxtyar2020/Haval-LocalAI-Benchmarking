@@ -9,6 +9,7 @@ from haval_engine.hardware import format_gb, gpu_card_copy, os_label
 from haval_engine.models.params import parse_params
 from haval_engine.pack import load_scenarios
 from haval_engine.paths import config_dir
+from haval_engine.scoring.fail_reason import customer_fail_line, summarize_failures
 from haval_engine.scoring.pipeline import (
     combine_phases,
     evaluate_match,
@@ -17,6 +18,7 @@ from haval_engine.scoring.pipeline import (
     havalllmphase2_quality_total,
     persona_phase2_score,
     phase1_score,
+    role_speed_band,
 )
 
 PERSONA_ORDER = [
@@ -169,6 +171,14 @@ def headline_for_run(run: dict | None) -> str:
     if not run:
         return "How this PC performed"
     try:
+        summary = json.loads(run.get("summary_json") or "{}")
+    except json.JSONDecodeError:
+        summary = {}
+    if summary.get("kind") == "comparison":
+        models = summary.get("models") or []
+        n = len(models) if isinstance(models, list) else 0
+        return str(summary.get("headline") or f"Comparison · {n} models")
+    try:
         models = json.loads(run.get("models_json") or "[]")
     except json.JSONDecodeError:
         models = []
@@ -285,7 +295,7 @@ def _attempt_rows(attempts: list[dict], model: str, scenario_id: str) -> list[di
     return [a for a in attempts if a.get("model") == model and a.get("scenario_id") == scenario_id]
 
 
-def _phase1_for(row: dict, attempts: list[dict], model: str) -> float | None:
+def _phase1_for(row: dict, attempts: list[dict], model: str, speed: str | None = None) -> float | None:
     atts = _attempt_rows(attempts, model, row.get("scenario_id") or "")
     content = row.get("q")
     if row.get("w") is not None and not atts:
@@ -297,13 +307,54 @@ def _phase1_for(row: dict, attempts: list[dict], model: str) -> float | None:
     toks = [a.get("tok_s") for a in atts] if atts else []
     return phase1_score(
         content=content,
-        speed=row.get("internal"),
+        speed=speed if speed and speed != "—" else row.get("internal"),
         answers=answers,
         successful=successful,
         attempted=attempted,
         headrooms=heads,
         tok_s=toks,
     )
+
+
+def _ask_actual_s(row: dict, attempts: list[dict], model: str) -> float | None:
+    if not row:
+        return None
+    atts = _attempt_rows(attempts, model, row.get("scenario_id") or "")
+    vals = [a.get("total_s") for a in atts if a.get("ok") and a.get("total_s") is not None]
+    return mean(vals)
+
+
+def _role_speed(slot: dict, attempts: list[dict], model: str, pack: dict) -> str:
+    actuals: list[float | None] = []
+    expecteds: list[float | None] = []
+    heavy_actual = None
+    for intensity in ("Light", "Balanced", "Heavy"):
+        row = slot.get(intensity) or {}
+        if not row:
+            continue
+        sc = pack.get(row.get("scenario_id") or "") or {}
+        exp = float(sc.get("total_s") or 0) or None
+        act = _ask_actual_s(row, attempts, model)
+        if act is not None and exp:
+            actuals.append(act)
+            expecteds.append(exp)
+        if intensity == "Heavy":
+            heavy_actual = act
+    band = role_speed_band(actuals, expecteds, heavy_actual)
+    if band != "—":
+        return band
+    bands = []
+    for intensity in ("Light", "Balanced", "Heavy"):
+        row = slot.get(intensity) or {}
+        if row.get("internal"):
+            bands.append(str(row.get("internal")))
+    if bands and all(b == "Slow" for b in bands):
+        return "Slow"
+    if any(b == "Fast" for b in bands):
+        return "Fast"
+    if any(b == "OK" for b in bands):
+        return "OK"
+    return "—"
 
 
 def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware: dict) -> dict:
@@ -330,7 +381,6 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
         ident = _identity(name)
         rows = by_model_scores.get(name) or []
         atts = by_model_attempts.get(name) or []
-        failed_all = not rows or all((r.get("successful") or 0) == 0 for r in rows)
         by_persona: dict[str, dict] = defaultdict(dict)
         meta: dict[str, str] = {}
         for row in rows:
@@ -338,6 +388,14 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 by_persona[row["persona"]][row["intensity"]] = row
                 meta[row["persona"]] = row.get("business") or ""
         roll = next((m for m in (summary.get("models") or []) if m.get("model") == name), {})
+        fail = roll.get("fail") if isinstance(roll.get("fail"), dict) else None
+        if not fail:
+            fail = summarize_failures(atts, thinking=bool(summary.get("thinking")))
+        too_slow = bool(fail and fail.get("kind") == "too_slow")
+        failed_all = too_slow or not rows or all((r.get("successful") or 0) == 0 for r in rows)
+        if failed_all and not fail:
+            fail = summarize_failures(atts, thinking=bool(summary.get("thinking")))
+        fail_why = customer_fail_line(fail) if fail else None
         phase2 = roll.get("phase2") or {}
         p2_pct = phase2.get("pct") or {}
         p2_total = phase2.get("total")
@@ -351,10 +409,11 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
             light = slot.get("Light") or {}
             bal = slot.get("Balanced") or {}
             heavy = slot.get("Heavy") or {}
+            role_speed = _role_speed(slot, atts, name, pack)
             p1_vals = [
-                _phase1_for(light, atts, name) if light else None,
-                _phase1_for(bal, atts, name) if bal else None,
-                _phase1_for(heavy, atts, name) if heavy else None,
+                _phase1_for(light, atts, name, role_speed) if light else None,
+                _phase1_for(bal, atts, name, role_speed) if bal else None,
+                _phase1_for(heavy, atts, name, role_speed) if heavy else None,
             ]
             p1 = mean(p1_vals)
             finishes = [light.get("r"), bal.get("r"), heavy.get("r")]
@@ -375,11 +434,8 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 phase2_pct=p2_pct or None,
                 phase1=p1,
                 content=contents,
-                speeds=[
-                    light.get("internal") if light else None,
-                    bal.get("internal") if bal else None,
-                    heavy.get("internal") if heavy else None,
-                ],
+                speeds=[role_speed],
+                fail_why=fail_why,
             )
             final = verdict["label"]
             persona_table.append(
@@ -396,6 +452,7 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                     "final": final,
                     "final_class": status_class(final),
                     "why": verdict["why"],
+                    "role_speed": role_speed,
                 }
             )
         businesses: dict[str, list[float]] = defaultdict(list)
@@ -428,7 +485,11 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
             contents = mean(
                 [row.get("q") for row in rows if (pack.get(row.get("scenario_id") or "") or {}).get("business") == b]
             )
-            speeds = [row.get("internal") for row in rows if (pack.get(row.get("scenario_id") or "") or {}).get("business") == b]
+            speeds = [
+                prow.get("role_speed")
+                for prow in persona_table
+                if prow.get("business") == b
+            ]
             verdict = evaluate_match(
                 finish=100.0 if val is not None else 0.0,
                 answer=val,
@@ -436,6 +497,7 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 phase2_pct=p2_pct or None,
                 content=contents,
                 speeds=speeds,
+                fail_why=fail_why,
             )
             lab = verdict["label"]
             mix = _role_mix(persona_table, b)
@@ -446,7 +508,7 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 "why": verdict["why"],
                 **mix,
             }
-        q = mean([_phase1_for(r, atts, name) for r in rows])
+        q = mean([_phase1_for(r, atts, name, _role_speed(by_persona.get(r.get("persona") or "") or {}, atts, name, pack)) for r in rows])
         r = mean([r.get("r") for r in rows])
         combined = combine_phases(q, p2_total)
         tok = mean([a.get("tok_s") for a in atts if a.get("ok")])
@@ -459,7 +521,8 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
             phase2_pct=p2_pct or None,
             phase1=q,
             content=mean([row.get("q") for row in rows]),
-            speeds=[row.get("internal") for row in rows],
+            speeds=[prow.get("role_speed") for prow in persona_table],
+            fail_why=fail_why,
         )
         customer = customer_v["label"]
         p2_rows = []
@@ -486,7 +549,8 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 "display": f"{ident['display']} {ident['tag']}".strip(),
                 "ident": ident,
                 "failed": failed_all,
-                "fail_reason": "Failed — Failed to run the LLM model." if failed_all and not atts else ("Failed — no gradeable scenario results." if failed_all else None),
+                "fail_kind": (fail or {}).get("kind") if failed_all else None,
+                "fail_reason": customer_fail_line(fail) if failed_all else None,
                 "Q": combined,
                 "R": r,
                 "Qd": dash(combined, "int"),
@@ -505,7 +569,7 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 "personas": persona_table,
                 "phase2_rows": p2_rows,
                 "phase2_excluded": ", ".join(phase2.get("excluded") or ["multilingual", "sensitivity"]),
-                "use": "—" if failed_all else "Final = 50% Phase 1 + 50% Phase 2. Slow does not mean Failed.",
+                "use": "—" if failed_all else "Final = 50% Phase 1 + 50% Phase 2. Role time uses the average of Light, Balanced, and Heavy. Over 2× that average expected time is Not Recommended, not Failed.",
             }
         )
     model_views.sort(key=lambda m: _identity(m["name"])["order"])
@@ -549,7 +613,7 @@ def build_context(run: dict, scores: list[dict], attempts: list[dict], hardware:
                 "why": "No gradeable score for this business on this run.",
                 "pill": "Failed",
                 "cls": "failed",
-                "tip": "Failed because it did not finish any answers.",
+                "tip": (one.get("fail_reason") if one else None) or "Failed because it did not finish any answers.",
                 "fit_pct": 0,
                 "not_pct": 100,
                 "summary": "",

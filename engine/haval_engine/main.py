@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 
 from haval_engine import __version__
 from haval_engine.auth import require_token
@@ -15,6 +16,7 @@ from haval_engine.doctor import router as doctor_router
 from haval_engine.doctor.service import SERVICE
 from haval_engine.models import router as models_router
 from haval_engine.pack.routes import router as pack_router
+from haval_engine.ollama.runtime import load_settings, save_settings
 from haval_engine.paths import support_log_path
 from haval_engine.report import router as report_router
 
@@ -70,14 +72,22 @@ def bench_readiness(_: None = Depends(require_token)) -> dict:
     return snap.get("gate") or {"ready": False, "reasons": ["Doctor has not finished yet."]}
 
 
+class SettingsPatch(BaseModel):
+    default_report_dir: str | None = Field(default=None)
+
+
+def _prefs() -> dict:
+    raw = (load_settings().get("default_report_dir") or "").strip()
+    return {"default_report_dir": raw}
+
+
 @app.get("/settings")
 def get_settings(_: None = Depends(require_token)) -> dict:
-    return {
-        "updates": True,
-        "telemetry": False,
-        "hideCmd": True,
-        "autoSelect": True,
-        "keepModels": True,
-        "ollama_api": "127.0.0.1:11434",
-        "theme": "Warm Light",
-    }
+    return _prefs()
+
+
+@app.post("/settings")
+def patch_settings(payload: SettingsPatch, _: None = Depends(require_token)) -> dict:
+    if payload.default_report_dir is not None:
+        save_settings({"default_report_dir": payload.default_report_dir.strip()})
+    return _prefs()

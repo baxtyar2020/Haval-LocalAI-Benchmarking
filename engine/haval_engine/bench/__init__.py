@@ -1,10 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from haval_engine.bench.orchestrator import RUNNER
 from haval_engine.report.context import headline_for_run
 from haval_engine.data.store import RunStore
 from haval_engine.ollama.runtime import load_settings, save_settings
+import asyncio
+import json
 
 router = APIRouter(prefix="/bench", tags=["bench"])
 _store = RunStore()
@@ -61,6 +64,33 @@ def bench_pause() -> dict:
 @router.post("/stop")
 def bench_stop() -> dict:
     return RUNNER.stop()
+
+
+@router.get("/events")
+async def bench_events(request: Request) -> StreamingResponse:
+    queue: asyncio.Queue[dict] = asyncio.Queue()
+    loop = asyncio.get_event_loop()
+
+    def push(snap: dict) -> None:
+        loop.call_soon_threadsafe(queue.put_nowait, snap)
+
+    RUNNER.subscribe(push)
+    queue.put_nowait(RUNNER.status())
+
+    async def gen():
+        try:
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    snap = await asyncio.wait_for(queue.get(), timeout=15)
+                    yield f"data: {json.dumps(snap)}\n\n"
+                except TimeoutError:
+                    yield "data: {\"ping\": true}\n\n"
+        finally:
+            RUNNER.unsubscribe(push)
+
+    return StreamingResponse(gen(), media_type="text/event-stream")
 
 
 def _runs_for_ui() -> list[dict]:

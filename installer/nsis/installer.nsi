@@ -36,6 +36,7 @@ Var UpdateMode
 Var NoShortcutMode
 Var WixMode
 Var OldMainBinaryName
+Var KeepData
 
 {{#if installer_hooks}}
 !include "{{installer_hooks}}"
@@ -182,6 +183,9 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 Var ReinstallPageCheck
 Page custom PageReinstall PageLeaveReinstall
 Function PageReinstall
+ ${If} $UpdateMode = 1
+  Abort
+ ${EndIf}
  ; Uninstall previous WiX installation if exists.
  ;
  ; A WiX installer stores the installation info in registry
@@ -522,6 +526,9 @@ Function .onInit
  Call RestorePreviousInstallLocation
  ${EndIf}
 
+ Call HavalResolveInstallDir
+ Call HavalMaybeEnterUpdateMode
+
  !if "${INSTALLMODE}" == "both"
  !insertmacro MULTIUSER_INIT
  !endif
@@ -737,13 +744,18 @@ Section Install
  !insertmacro NSIS_HOOK_POSTINSTALL
  !endif
 
- ; Auto close this page for passive mode
+ ; Auto close this page for passive mode or in-app update
  ${If} $PassiveMode = 1
+ ${OrIf} $UpdateMode = 1
  SetAutoClose true
  ${EndIf}
 SectionEnd
 
 Function .onInstSuccess
+ ${If} $UpdateMode = 1
+  nsis_tauri_utils::RunAsUser "$INSTDIR\${MAINBINARYNAME}.exe" ""
+  Return
+ ${EndIf}
  ; Check for `/R` flag only in silent and passive installers because
  ; GUI installer has a toggle for the user to (re)start the app
  ${If} $PassiveMode = 1
@@ -773,6 +785,12 @@ Function un.onInit
  ${GetOptions} $CMDLINE "/UPDATE" $UpdateMode
  ${IfNot} ${Errors}
  StrCpy $UpdateMode 1
+ ${EndIf}
+
+ ${GetOptions} $CMDLINE "/KEEP_DATA" $KeepData
+ ${IfNot} ${Errors}
+ StrCpy $KeepData 1
+ StrCpy $DeleteAppDataCheckboxState 0
  ${EndIf}
 FunctionEnd
 
@@ -869,6 +887,10 @@ Section Uninstall
 
  ; Delete app data if the checkbox is selected
  ; and if not updating
+ ${If} $KeepData = 1
+ ${OrIf} $UpdateMode = 1
+  Goto skip_delete_app_data
+ ${EndIf}
  ${If} $DeleteAppDataCheckboxState = 1
  ${AndIf} $UpdateMode <> 1
  ; Clear the install location $INSTDIR from registry
@@ -884,6 +906,7 @@ Section Uninstall
  RmDir /r "$APPDATA\${BUNDLEID}"
  RmDir /r "$LOCALAPPDATA\${BUNDLEID}"
  ${EndIf}
+ skip_delete_app_data:
 
  !ifmacrodef NSIS_HOOK_POSTUNINSTALL
  !insertmacro NSIS_HOOK_POSTUNINSTALL
@@ -907,7 +930,10 @@ Function Skip
 FunctionEnd
 
 Function SkipIfPassive
- ${IfThen} $PassiveMode = 1 ${|} Abort ${|}
+ ${If} $PassiveMode = 1
+ ${OrIf} $UpdateMode = 1
+  Abort
+ ${EndIf}
 FunctionEnd
 Function un.SkipIfPassive
  ${IfThen} $PassiveMode = 1 ${|} Abort ${|}
@@ -947,10 +973,10 @@ Function CreateOrUpdateStartMenuShortcut
 
  !if "${STARTMENUFOLDER}" != ""
  CreateDirectory "$SMPROGRAMS\$AppStartMenuFolder"
- CreateShortcut "$SMPROGRAMS\$AppStartMenuFolder\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe"
+ CreateShortcut "$SMPROGRAMS\$AppStartMenuFolder\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe" "" "$INSTDIR\${MAINBINARYNAME}.exe" 0
  !insertmacro SetLnkAppUserModelId "$SMPROGRAMS\$AppStartMenuFolder\${PRODUCTNAME}.lnk"
  !else
- CreateShortcut "$SMPROGRAMS\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe"
+ CreateShortcut "$SMPROGRAMS\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe" "" "$INSTDIR\${MAINBINARYNAME}.exe" 0
  !insertmacro SetLnkAppUserModelId "$SMPROGRAMS\${PRODUCTNAME}.lnk"
  !endif
 FunctionEnd
@@ -974,6 +1000,6 @@ Function CreateOrUpdateDesktopShortcut
  ${EndIf}
  ${EndIf}
 
- CreateShortcut "$DESKTOP\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe"
+ CreateShortcut "$DESKTOP\${PRODUCTNAME}.lnk" "$INSTDIR\${MAINBINARYNAME}.exe" "" "$INSTDIR\${MAINBINARYNAME}.exe" 0
  !insertmacro SetLnkAppUserModelId "$DESKTOP\${PRODUCTNAME}.lnk"
 FunctionEnd

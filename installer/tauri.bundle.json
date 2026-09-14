@@ -5,7 +5,8 @@
       "../../engine/haval_engine": "haval_engine",
       "../../engine/requirements.txt": "requirements.txt",
       "../../LICENSE": "LICENSE",
-      "../../installer/runtime/python": "python"
+      "../../installer/runtime/python": "python",
+      "../../installer/runtime/node": "node"
     }
   }
 }

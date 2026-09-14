@@ -7,35 +7,26 @@ type Props = {
   repair: RepairState;
   onTab: (id: TabId) => void;
   onHelp: () => void;
+  lockedTabs?: TabId[];
 };
 
-export function AppHeader({ tab, repair, onTab, onHelp }: Props) {
-  const health =
+export function AppHeader({ tab, repair, onTab, onHelp, lockedTabs = [] }: Props) {
+  const healthClass =
     repair === "ready"
-      ? { label: "Ready", bg: "var(--ok-bg)", fg: "var(--ok)", dot: "var(--ok)", halo: "rgba(40,118,83,.18)" }
+      ? "ready"
       : repair === "repairing"
-        ? {
-            label: "Repairing",
-            bg: "var(--accent-soft)",
-            fg: "var(--accent-text)",
-            dot: "var(--accent)",
-            halo: "rgba(219,79,27,.18)",
-          }
+        ? "repairing"
         : repair === "checking"
-          ? {
-              label: "Checking",
-              bg: "var(--info-bg)",
-              fg: "var(--info)",
-              dot: "var(--info)",
-              halo: "rgba(69,106,135,.18)",
-            }
-          : {
-              label: "Needs attention",
-              bg: "var(--warn-bg)",
-              fg: "var(--warn)",
-              dot: "var(--warn)",
-              halo: "rgba(167,96,0,.18)",
-            };
+          ? "checking"
+          : "attention";
+  const healthLabel =
+    repair === "ready"
+      ? "Ready"
+      : repair === "repairing"
+        ? "Repairing"
+        : repair === "checking"
+          ? "Checking"
+          : "Needs attention";
 
   return (
     <header className="header">
@@ -49,31 +40,28 @@ export function AppHeader({ tab, repair, onTab, onHelp }: Props) {
         </div>
       </div>
       <nav className="nav" aria-label="Primary">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={`nav-pill${tab === t.id ? " active" : ""}`}
-            onClick={() => onTab(t.id)}
-            aria-current={tab === t.id ? "page" : undefined}
-          >
-            <Icon name={t.icon} size={16} />
-            {t.label}
-          </button>
-        ))}
+        {TABS.map((t) => {
+          const locked = lockedTabs.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              className={`nav-pill${tab === t.id ? " active" : ""}${locked ? " locked" : ""}`}
+              onClick={() => onTab(t.id)}
+              disabled={locked}
+              aria-disabled={locked}
+              aria-current={tab === t.id ? "page" : undefined}
+              title={locked ? "Update this app in Settings before using this page." : undefined}
+            >
+              <Icon name={t.icon} size={16} />
+              {t.label}
+            </button>
+          );
+        })}
       </nav>
       <div className="header-right">
-        <div
-          className="health-pill"
-          role="status"
-          aria-live="polite"
-          style={{ background: health.bg, color: health.fg }}
-          title="Machine readiness"
-        >
-          <span
-            className="health-dot"
-            style={{ background: health.dot, boxShadow: `0 0 0 3px ${health.halo}` }}
-          />
-          {health.label}
+        <div className={`health-pill ${healthClass}`} role="status" aria-live="polite" title="Machine readiness">
+          <span className="health-dot" />
+          {healthLabel}
         </div>
         <button className="icon-btn" aria-label="Help" onClick={onHelp}>
           <Icon name="life-buoy" size={17} />

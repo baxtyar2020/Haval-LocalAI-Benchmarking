@@ -14,6 +14,28 @@
       <div>
         <div class="kicker">This PC · one model</div>
         <h1>{{ headline_html|safe }}</h1>
+        {% if models and models[0].failed and models[0].fail_reason %}
+        <div class="fail-banner">
+          <span class="fail-icon" aria-hidden="true">
+            {% if models[0].fail_kind == 'hardware' %}
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="10" y="10" width="28" height="28" rx="4"/><rect x="18" y="18" width="12" height="12"/><path d="M16 4v6m8-6v6m8-6v6M16 38v6m8-6v6m8-6v6M4 16h6m-6 8h6m-6 8h6m34-16h6m-6 8h6m-6 8h6"/></svg>
+            {% elif models[0].fail_kind == 'too_slow' or models[0].fail_kind == 'timeout' %}
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="24" cy="24" r="16"/><path d="M24 14v11l8 5"/></svg>
+            {% elif models[0].fail_kind == 'thinking' %}
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="20" cy="22" r="10"/><path d="M17 32c-6 2-9 8-9 8h22s-2-6-6-8"/><circle cx="34" cy="14" r="4"/><circle cx="40" cy="22" r="3"/></svg>
+            {% elif models[0].fail_kind == 'unreachable' %}
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 20c8-8 24-8 32 0M14 26c5-5 15-5 20 0M20 32c3-3 5-3 8 0"/><path d="M12 36l24-24"/></svg>
+            {% else %}
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="24" cy="24" r="16"/><path d="M24 16v12"/><circle cx="24" cy="34" r="1.6" fill="currentColor" stroke="none"/></svg>
+            {% endif %}
+          </span>
+          <div>
+            <div class="fail-kicker">Why this run failed</div>
+            <p>{{ models[0].fail_reason }}</p>
+          </div>
+        </div>
+        {% endif %}
+        {% if incomplete %}<p class="notice">{{ notice }}</p>{% endif %}
       </div>
       <aside class="verdict verdict-{{ suit_class }}">
         <div class="verdict-stage" aria-hidden="true">
@@ -171,7 +193,25 @@
             </div>
           </div>
           {% if m.failed %}
-            <div class="tablecard" style="padding:22px"><strong>Failed</strong> — {{ m.fail_reason }} Scores are not invented.</div>
+            <div class="fail-banner fail-banner-block">
+              <span class="fail-icon" aria-hidden="true">
+                {% if m.fail_kind == 'hardware' %}
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="10" y="10" width="28" height="28" rx="4"/><rect x="18" y="18" width="12" height="12"/><path d="M16 4v6m8-6v6m8-6v6M16 38v6m8-6v6m8-6v6M4 16h6m-6 8h6m-6 8h6m34-16h6m-6 8h6m-6 8h6"/></svg>
+                {% elif m.fail_kind == 'too_slow' or m.fail_kind == 'timeout' %}
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="24" cy="24" r="16"/><path d="M24 14v11l8 5"/></svg>
+                {% elif m.fail_kind == 'thinking' %}
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="20" cy="22" r="10"/><path d="M17 32c-6 2-9 8-9 8h22s-2-6-6-8"/><circle cx="34" cy="14" r="4"/><circle cx="40" cy="22" r="3"/></svg>
+                {% elif m.fail_kind == 'unreachable' %}
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 20c8-8 24-8 32 0M14 26c5-5 15-5 20 0M20 32c3-3 5-3 8 0"/><path d="M12 36l24-24"/></svg>
+                {% else %}
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="24" cy="24" r="16"/><path d="M24 16v12"/><circle cx="24" cy="34" r="1.6" fill="currentColor" stroke="none"/></svg>
+                {% endif %}
+              </span>
+              <div>
+                <div class="fail-kicker">Why this run failed</div>
+                <p>{{ m.fail_reason }}</p>
+              </div>
+            </div>
           {% else %}
             <div class="tablecard"><div class="scroll"><table class="persona-table">
               <thead><tr><th>Business</th><th>Persona</th><th>Light</th><th>Balanced</th><th>Heavy</th><th>Phase 1</th><th>Phase 2</th><th>Final</th><th>Match</th></tr></thead>
@@ -190,7 +230,7 @@
           {% endif %}
         </article>
       {% endfor %}
-      <div class="taxonomy-note">Failed means no gradeable answer. Slow never turns a finished run into Failed. Phase 2 does not include multilingual or sensitivity.</div>
+      <div class="taxonomy-note">Failed means no gradeable answer. Role time is the average of Light, Balanced, and Heavy. If that average (or Heavy alone) beats the average expected time, the role is Fast. Otherwise under 1.5× is still Fast, 1.5× to 2× is OK but very slow, and over 2× is Not Recommended. Phase 2 does not include multilingual or sensitivity.</div>
     </section>
 
     <section class="section">

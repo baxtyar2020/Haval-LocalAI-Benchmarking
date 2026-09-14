@@ -10,6 +10,7 @@ from haval_engine.scoring.pipeline import (
     phase1_score,
     quality,
     reliability,
+    role_speed_band,
     speed_band,
     speed_points,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "phase1_score",
     "quality",
     "reliability",
+    "role_speed_band",
     "speed_band",
     "speed_points",
 ]

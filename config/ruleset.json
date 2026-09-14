@@ -1,16 +1,21 @@
 {
-  "version": "3.3.2",
+  "version": "3.3.4",
   "labels": {
     "excellent": 88,
     "strong": 75,
     "acceptable": 62,
     "marginal": 48
   },
-  "speed_ok_multiple": 2.0,
+  "speed_ok_multiple": 1.5,
+  "speed_wall_multiple": 2.0,
   "speed_points": {
     "Fast": 100,
     "OK": 75,
-    "Slow": 40
+    "Slow": 20
+  },
+  "speed_content_scale": {
+    "OK": 0.9,
+    "Slow": 0.25
   },
   "phase1_weights": {
     "content": 0.70,

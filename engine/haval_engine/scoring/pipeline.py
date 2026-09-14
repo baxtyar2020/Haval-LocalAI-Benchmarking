@@ -21,8 +21,36 @@ def speed_band(actual_s: float | None, target_s: float) -> str:
         return "—"
     if actual_s <= target_s:
         return "Fast"
-    multiple = float(load_ruleset().get("speed_ok_multiple") or 2)
-    if actual_s <= target_s * multiple:
+    multiple = float(load_ruleset().get("speed_ok_multiple") or 1.5)
+    # Under 1.5×: OK but very slow. At 1.5× or more: Slow → Not Recommended.
+    if actual_s < target_s * multiple:
+        return "OK"
+    return "Slow"
+
+
+def role_speed_band(
+    actuals: list[float | None],
+    expecteds: list[float | None],
+    heavy_actual: float | None = None,
+) -> str:
+    """Phase 1 time for a whole role (Light + Balanced + Heavy), not one ask.
+
+    First look: Fast if the average finish is at or under the average expected
+    time, or if Heavy alone finished at or under that same average expected.
+    Second look: under 1.5× expected average is still Fast; 1.5× through 2× is
+    OK (very slow); over 2× is Slow / Not Recommended.
+    """
+    avg_a = mean(list(actuals))
+    avg_e = mean(list(expecteds))
+    if avg_a is None or avg_e is None or avg_e <= 0:
+        return "—"
+    if avg_a <= avg_e or (heavy_actual is not None and heavy_actual <= avg_e):
+        return "Fast"
+    ok_m = float(load_ruleset().get("speed_ok_multiple") or 1.5)
+    wall_m = float(load_ruleset().get("speed_wall_multiple") or 2.0)
+    if avg_a < avg_e * ok_m:
+        return "Fast"
+    if avg_a <= avg_e * wall_m:
         return "OK"
     return "Slow"
 
@@ -30,7 +58,7 @@ def speed_band(actual_s: float | None, target_s: float) -> str:
 def speed_points(band: str | None) -> float | None:
     if not band:
         return None
-    pts = load_ruleset().get("speed_points") or {"Fast": 100, "OK": 75, "Slow": 40}
+    pts = load_ruleset().get("speed_points") or {"Fast": 100, "OK": 75, "Slow": 20}
     if band not in pts:
         return None
     return float(pts[band])
@@ -95,12 +123,13 @@ def phase1_score(
     w = load_ruleset().get("phase1_weights") or {}
     raw = float(content)
     band = speed or "—"
-    # Overtime: Phase 2 zeros the item. Phase 1 scales content instead of zeroing
-    # the whole sitting task, but Slow cannot stay at 100.
+    # Overtime: Phase 2 zeros the item. Phase 1 scales content. Slow (1.5× budget)
+    # must land in the Not Recommended numeric band even if the answer was perfect.
+    scales = load_ruleset().get("speed_content_scale") or {}
     if band == "Slow":
-        raw = raw * 0.5
+        raw = raw * float(scales.get("Slow") or 0.25)
     elif band == "OK":
-        raw = raw * 0.9
+        raw = raw * float(scales.get("OK") or 0.9)
     sp = speed_points(speed)
     if sp is None:
         sp = raw
@@ -286,6 +315,10 @@ def _speed_clause(speeds: list[str | None] | None, speed: str | None) -> str:
         return "it responded fast"
     if all(s == "Slow" for s in vals):
         return "it finished slowly"
+    if all(s in {"OK", "Slow"} for s in vals) and "OK" in vals:
+        return "it finished, but was very slow"
+    if all(s in {"Fast", "OK"} for s in vals):
+        return "it finished, but was very slow on some asks"
     return "it finished in a mixed time"
 
 
@@ -312,9 +345,12 @@ def match_explain(
     speed: str | None = None,
     content: float | None = None,
     phase1: float | None = None,
+    fail_why: str | None = None,
 ) -> str:
     if label == "Failed":
-        return "Failed because it did not finish any answers."
+        return fail_why or "Failed because it did not finish any answers."
+    if label == "Not Recommended" and _too_slow(speeds, speed) and not blocked_by:
+        return "Not Recommended because it was too slow for this role's expected response time."
     speed_bit = _speed_clause(speeds, speed)
     quality_bit = _quality_clause(content, phase1)
     strong_skills = []
@@ -351,6 +387,12 @@ def match_explain(
     return " ".join(text.split())
 
 
+def _too_slow(speeds: list[str | None] | None, speed: str | None) -> bool:
+    if speed == "Slow":
+        return True
+    return any(s == "Slow" for s in (speeds or []))
+
+
 def evaluate_match(
     *,
     finish: float | None,
@@ -361,12 +403,25 @@ def evaluate_match(
     phase1: float | None = None,
     content: float | None = None,
     speeds: list[str | None] | None = None,
+    fail_why: str | None = None,
 ) -> dict:
     if not finish:
-        return {"label": "Failed", "why": match_explain("Failed"), "blocked_by": None}
+        return {"label": "Failed", "why": match_explain("Failed", fail_why=fail_why), "blocked_by": None}
+    if _too_slow(speeds, speed):
+        return {
+            "label": "Not Recommended",
+            "why": match_explain(
+                "Not Recommended",
+                speeds=speeds,
+                speed=speed,
+                content=content,
+                phase1=phase1,
+            ),
+            "blocked_by": None,
+        }
     score = quality(answer, speed) if speed is not None else answer
     if score is None:
-        return {"label": "Failed", "why": match_explain("Failed"), "blocked_by": None}
+        return {"label": "Failed", "why": match_explain("Failed", fail_why=fail_why), "blocked_by": None}
     numeric = _numeric_label(float(score))
     crit = critical_categories(*(personas or []))
     start = _LABEL_ORDER.index(numeric)

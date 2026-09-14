@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
 
 from haval_engine.data.store import RunStore, runs_dir
 from haval_engine.report.context import headline_for_run
@@ -7,6 +8,38 @@ from haval_engine.report.render import generate_report, report_html_path, report
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 _store = RunStore()
+
+
+class CompareUpload(BaseModel):
+    name: str
+    html: str
+
+
+class CompareRequest(BaseModel):
+    run_ids: list[str] = Field(default_factory=list)
+    uploads: list[CompareUpload] = Field(default_factory=list)
+
+
+@router.get("/compare/sources")
+def compare_sources() -> dict:
+    from haval_engine.compare.service import list_compare_sources
+    from haval_engine.hardware import computer_name
+
+    return {"runs": list_compare_sources(_store), "this_machine": computer_name()}
+
+
+@router.post("/compare")
+def run_compare(payload: CompareRequest) -> dict:
+    from haval_engine.compare.service import build_from_inputs
+
+    uploads = [(u.name, u.html) for u in payload.uploads]
+    try:
+        run_id, path = build_from_inputs(_store, payload.run_ids, uploads)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Comparison could not be built.") from exc
+    return {"ok": True, "run_id": run_id, "html_path": str(path)}
 
 
 def _open_path(path) -> None:
@@ -19,7 +52,10 @@ def _open_path(path) -> None:
 def render_report(run_id: str) -> dict:
     if not _store.get(run_id):
         raise HTTPException(status_code=404, detail="Run not found")
-    path = generate_report(run_id)
+    try:
+        path = generate_report(run_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Report could not be created: {exc}") from exc
     pdf = try_pdf(run_id)
     return {"html_path": str(path), "pdf_path": str(pdf) if pdf else None, "folder": str(path.parent)}
 

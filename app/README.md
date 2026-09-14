@@ -1,10 +1,12 @@
 # Haval LocalAI Bench (desktop)
 
-Tauri 2 + React UI. From this folder:
+Tauri 2 + React. From this folder:
 
 ```powershell
 npm install
 npm run tauri dev
 ```
 
-Product docs and engine live in the repository root. See the root `README.md`.
+Engine, config, and full compile steps: repository root `README.md`.
+
+Windows installer and product article: https://havalothman.com/blog/which-local-ai-llm-fits-your-pc

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import threading
 import time
@@ -23,6 +24,7 @@ from haval_engine.scoring.pipeline import (
     phase1_score,
     quality,
     reliability,
+    role_speed_band,
     speed_band,
 )
 
@@ -32,12 +34,42 @@ def _log(line: str) -> None:
         fh.write(f"[bench] {line}\n")
 
 
-def attempt_wall_s(scenario: dict) -> float:
-    """Hard cap for one generate: the scenario's published time budget, not a multiple of it."""
-    return max(20.0, float(scenario.get("total_s") or 90))
+from haval_engine.scoring.fail_reason import (
+    fail_payload,
+    phase1_all_hardware,
+    phase1_all_roles_too_slow,
+    phase1_any_role_continues,
+    summarize_failures,
+)
+from haval_engine.scoring.rules import load_ruleset
+
+
+def attempt_wall_s(scenario: dict, think: bool = False) -> float:
+    """Hard cap: 2× the role budget. 1.5× or more is Not Recommended.
+
+    Thinking on is allowed ~3× that wait so the hidden pass can finish before the answer.
+    """
+    base = max(20.0, float(scenario.get("total_s") or 90))
+    wall = base * float(load_ruleset().get("speed_wall_multiple") or 2.0)
+    return wall * 3.0 if think else wall
 
 
 _CAP_ERRORS = {"cancelled", "wall_timeout", "repeat_loop", "output_cap"}
+
+# Unscored practice ask: similar length to a Light prompt so the first scored
+# question is not paying a cold first-token hitch.
+WARMUP_PREDICT = 160
+WARMUP_PROMPT = (
+    "This is a warm-up. The answer is not scored.\n\n"
+    "FACTS\n"
+    "- Leave the house at 7:40am\n"
+    "- Two kids need packed lunches\n"
+    "- Trash goes out on Tuesday\n"
+    "- Keys hang on the hook by the door\n\n"
+    "Write a 6-line weekday morning checklist. Time first when a time is known.\n"
+    "Do not add errands. No preamble. No tips.\n\n"
+    "HARD LIMIT: 120 words."
+)
 
 
 def _grade_or_timeout(scenario: dict, text: str, seconds: float = 20) -> dict:
@@ -89,6 +121,7 @@ class BenchRunner:
         self._pause.set()
         self._thread: threading.Thread | None = None
         self._run_t0: float | None = None
+        self._listeners: list = []
         self.snapshot: dict = {
             "state": "idle",
             "run_id": None,
@@ -126,6 +159,24 @@ class BenchRunner:
             snap["thinking"] = bool(load_settings().get("thinking", False))
         return snap
 
+    def subscribe(self, listener) -> None:
+        with self._lock:
+            self._listeners.append(listener)
+
+    def unsubscribe(self, listener) -> None:
+        with self._lock:
+            self._listeners = [item for item in self._listeners if item is not listener]
+
+    def _notify(self) -> None:
+        snap = self.status()
+        with self._lock:
+            listeners = list(self._listeners)
+        for listener in listeners:
+            try:
+                listener(snap)
+            except Exception:
+                pass
+
     def _emit(self, **fields: object) -> None:
         with self._lock:
             self.snapshot.update(fields)
@@ -133,6 +184,7 @@ class BenchRunner:
                 lines = list(self.snapshot.get("log") or [])
                 lines.append(str(fields["log_line"]))
                 self.snapshot["log"] = lines[-80:]
+        self._notify()
 
     def start(self, personas: list[str] | None = None, report_dir: str | None = None) -> dict:
         gate = DOCTOR.snapshot().get("gate") or {}
@@ -148,7 +200,7 @@ class BenchRunner:
         picked = [p for p in (personas or []) if p in known]
         if personas and not picked:
             return {"ok": False, "error": "Select at least one persona."}
-        dest = (report_dir or "").strip() or None
+        dest = (report_dir or "").strip() or (load_settings().get("default_report_dir") or "").strip() or None
         with self._lock:
             if self.snapshot.get("state") in {"running", "paused"}:
                 return {"ok": False, "error": "A benchmark is already running."}
@@ -198,10 +250,8 @@ class BenchRunner:
     def stop(self) -> dict:
         self._stop.set()
         self._pause.set()
-        run_id = self.snapshot.get("run_id")
-        if run_id:
-            self.store.set_status(run_id, "stopped")
-        self._emit(state="idle", message="Stopped. Partial results were kept.", pct=self.snapshot.get("pct") or 0, open_report=None)
+        if self.snapshot.get("state") in {"running", "paused"}:
+            self._emit(message="Stopping — writing a report of what finished.", log_line="stop requested")
         return self.status()
 
     def _wait_pause(self) -> None:
@@ -209,10 +259,10 @@ class BenchRunner:
             time.sleep(0.2)
 
     def _warmup(self, model: str, t0: float) -> None:
-        prompt = "Reply with one word: ready."
+        prompt = WARMUP_PROMPT
         self._emit(
             message="Warming up the model",
-            detail="Loading weights and running a short test before scoring starts.",
+            detail="Running one unpaid practice question so the first timed ask is not a cold start.",
             prompt=prompt,
             answer="",
             task_title="Warm-up",
@@ -226,7 +276,7 @@ class BenchRunner:
             gen = ollama.generate_stream(
                 model,
                 prompt,
-                num_predict=24,
+                num_predict=WARMUP_PREDICT,
                 timeout=180,
                 stall_s=15,
                 wall_s=180,
@@ -264,7 +314,7 @@ class BenchRunner:
         if limit:
             scenarios = scenarios[: max(1, int(limit))]
         attempts_n = 1
-        skip_phase2 = bool(os.environ.get("HAVAL_BENCH_SKIP_PHASE2") or os.environ.get("HAVAL_BENCH_MAX_SCENARIOS"))
+        skip_phase2 = bool(os.environ.get("HAVAL_BENCH_SKIP_PHASE2"))
         phase1_units = max(1, len(models) * len(scenarios) * attempts_n)
         phase2_units = 0
         if not skip_phase2:
@@ -285,6 +335,7 @@ class BenchRunner:
                     break
                 h_samples: list[dict] = []
                 by_scenario: dict[str, dict] = {}
+                skip_p2 = skip_phase2
                 for scenario in scenarios:
                     self._wait_pause()
                     if self._stop.is_set():
@@ -308,14 +359,14 @@ class BenchRunner:
                             task_title="",
                             log_line=f"run {scenario['id']}",
                         )
-                        wall = attempt_wall_s(scenario)
+                        wall = attempt_wall_s(scenario, think)
                         self._emit(
                             log_line=f"cap {scenario['id']} {wall:.0f}s",
                         )
                         gen = ollama.generate_stream(
                             model,
                             asked,
-                            num_predict=4096,
+                            num_predict=8192 if think else 4096,
                             timeout=wall,
                             stall_s=min(12.0, wall),
                             wall_s=wall,
@@ -426,7 +477,7 @@ class BenchRunner:
                         "r": finish,
                         "w": p1,
                         "internal": speed,
-                        "customer": match_label(finish=finish, answer=p1),
+                        "customer": match_label(finish=finish, answer=p1, speed=speed),
                         "cap_reason": None,
                         "attempted": attempts_n,
                         "successful": success,
@@ -436,8 +487,26 @@ class BenchRunner:
                     }
                     self.store.upsert_scenario(rec)
                     by_scenario[scenario["id"]] = rec
+                fail = None
+                atts_m = [a for a in self.store.attempts_for(run_id) if a.get("model") == model]
+                recs = list(by_scenario.values())
+                recs = self._apply_role_speeds(model, recs, atts_m, scenarios)
+                by_scenario = {r["scenario_id"]: r for r in recs}
+                if not skip_p2 and not phase1_any_role_continues(recs, personas):
+                    skip_p2 = True
+                    if phase1_all_hardware(atts_m, thinking=think):
+                        fail = fail_payload("hardware")
+                    elif phase1_all_roles_too_slow(recs, personas):
+                        fail = fail_payload("too_slow")
+                    else:
+                        fail = summarize_failures(atts_m, thinking=think)
+                    self._emit(
+                        message="Phase 1 complete — skipping Phase 2",
+                        detail=(fail or {}).get("message") or "Every selected role failed.",
+                        log_line=f"phase1 skip phase2 {(fail or {}).get('kind')}",
+                    )
                 phase2 = None
-                if not skip_phase2 and not self._stop.is_set():
+                if not skip_p2 and not self._stop.is_set():
                     from haval_engine.phase2.runner import run_quality_pack
 
                     self._emit(message=f"{model} — Phase 2 capability pack", detail="", log_line="phase2 start")
@@ -469,10 +538,22 @@ class BenchRunner:
                     time.sleep(1.5)
                 except Exception:
                     pass
-                roll = self._model_rollups(model, list(by_scenario.values()), h_samples)
-                roll["phase2"] = phase2
-                model_summaries.append(roll)
+                if by_scenario or h_samples:
+                    roll = self._model_rollups(model, list(by_scenario.values()), h_samples)
+                    roll["phase2"] = phase2
+                    if not fail and not roll.get("finish"):
+                        fail = summarize_failures(atts_m, thinking=think)
+                    if fail:
+                        roll["fail"] = fail
+                        _log(f"fail {model} {fail['kind']}: {fail['headline']}")
+                    model_summaries.append(roll)
+            prior = {}
+            try:
+                prior = json.loads((self.store.get(run_id) or {}).get("summary_json") or "{}")
+            except json.JSONDecodeError:
+                prior = {}
             summary = {
+                **prior,
                 "models": model_summaries,
                 "scenario_count": len(scenarios),
                 "attempts": attempts_n,
@@ -481,18 +562,22 @@ class BenchRunner:
                 "report_dir": report_dir,
             }
             status = "stopped" if self._stop.is_set() else "completed"
+            if status == "stopped":
+                summary["partial"] = True
             self.store.set_status(run_id, status, summary)
             self.store.export_csv(run_id)
+            wrote = None
             try:
-                generate_report(run_id, self.store)
+                wrote = generate_report(run_id, self.store)
             except Exception as exc:  # noqa: BLE001
                 _log(f"report {exc}")
             self._emit(
-                state="idle" if status == "completed" else "idle",
-                message="Benchmark complete" if status == "completed" else "Stopped. Partial results were kept.",
+                state="idle",
+                message="Benchmark complete" if status == "completed" else "Stopped. A report of what finished was saved.",
                 pct=100 if status == "completed" else self.snapshot.get("pct"),
                 detail=run_id,
-                open_report=run_id if status == "completed" else None,
+                open_report=run_id if wrote is not None else None,
+                log_line=f"finished {run_id} {status}",
             )
             _log(f"finished {run_id} {status}")
         except Exception as exc:  # noqa: BLE001
@@ -502,12 +587,69 @@ class BenchRunner:
         finally:
             self._run_t0 = None
 
+    def _apply_role_speeds(
+        self,
+        model: str,
+        recs: list[dict],
+        attempts: list[dict],
+        scenarios: list[dict],
+    ) -> list[dict]:
+        pack = {s["id"]: s for s in scenarios}
+        by_persona: dict[str, list[dict]] = defaultdict(list)
+        for rec in recs:
+            by_persona[str(rec.get("persona") or "")].append(rec)
+        out: list[dict] = []
+        for group in by_persona.values():
+            actuals: list[float | None] = []
+            expecteds: list[float | None] = []
+            heavy_actual = None
+            for rec in group:
+                sc = pack.get(rec.get("scenario_id") or "") or {}
+                exp = float(sc.get("total_s") or 0) or None
+                times = [
+                    float(a["total_s"])
+                    for a in attempts
+                    if a.get("model") == model
+                    and a.get("scenario_id") == rec.get("scenario_id")
+                    and a.get("ok")
+                    and a.get("total_s") is not None
+                ]
+                act = mean(times)
+                rec["actual_s"] = act
+                rec["expected_s"] = exp
+                if act is not None and exp:
+                    actuals.append(act)
+                    expecteds.append(exp)
+                if rec.get("intensity") == "Heavy":
+                    heavy_actual = act
+            band = role_speed_band(actuals, expecteds, heavy_actual)
+            for rec in group:
+                rec["role_speed"] = band
+                if rec.get("successful"):
+                    rec["w"] = phase1_score(
+                        content=rec.get("q"),
+                        speed=band,
+                        answers=[rec.get("q")],
+                        successful=int(rec.get("successful") or 0),
+                        attempted=int(rec.get("attempted") or 1),
+                        headrooms=[rec.get("e")],
+                        tok_s=[],
+                    )
+                    rec["customer"] = match_label(
+                        finish=rec.get("r"),
+                        answer=rec.get("w"),
+                        speed=band,
+                    )
+                self.store.upsert_scenario(rec)
+                out.append(rec)
+        return out
+
     def _model_rollups(self, model: str, rows: list[dict], h_samples: list[dict]) -> dict:
         by_persona: dict[str, dict[str, float | str | None]] = defaultdict(dict)
         personas_meta: dict[str, str] = {}
         for row in rows:
             by_persona[row["persona"]][row["intensity"]] = row.get("q")
-            by_persona[row["persona"]][row["intensity"] + "_speed"] = row.get("internal")
+            by_persona[row["persona"]][row["intensity"] + "_speed"] = row.get("role_speed") or row.get("internal")
             personas_meta[row["persona"]] = row["business"]
         persona_rows = []
         for persona, intensities in by_persona.items():

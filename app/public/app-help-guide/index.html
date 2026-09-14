@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to use Haval LocalAI Benchmarking</title>
+  <style>
+    :root {
+      --accent: #db4f1b;
+      --accent-600: #c04010;
+      --accent-700: #97310c;
+      --accent-100: #ffe9e0;
+      --sage: #7a8a5e;
+      --sage-100: #f0fae1;
+      --sage-800: #3d472b;
+      --bg: #fbf0de;
+      --surface: #f1e6d2;
+      --ink: #201e1d;
+      --muted: #645c50;
+      --line: rgba(32, 30, 29, 0.16);
+      --shadow: 0 3px 10px rgba(46, 43, 37, 0.14);
+    }
+    html[data-color-theme="current"] {
+      --accent: #db4f1b;
+      --accent-600: #c04010;
+      --accent-700: #97310c;
+      --accent-100: #ffe9e0;
+      --sage: #7a8a5e;
+      --sage-100: #f0fae1;
+      --sage-800: #3d472b;
+      --bg: #fbf0de;
+      --surface: #f1e6d2;
+      --ink: #201e1d;
+      --muted: #645c50;
+      --line: rgba(32, 30, 29, 0.16);
+      --shadow: 0 3px 10px rgba(46, 43, 37, 0.14);
+    }
+    html[data-color-theme="classic"] {
+      --accent: #db4f1b;
+      --accent-600: #c54518;
+      --accent-700: #a83b15;
+      --accent-100: #f4dcd0;
+      --sage: #287653;
+      --sage-100: #ddede5;
+      --sage-800: #1a4d36;
+      --bg: #f6f1e9;
+      --surface: #fbf7ef;
+      --ink: #1a1a1a;
+      --muted: #4a4540;
+      --line: #e6dfd3;
+      --shadow: 0 1px 2px rgba(26, 26, 26, 0.04), 0 6px 18px -8px rgba(26, 26, 26, 0.08);
+    }
+    html[data-color-theme="dawn"] {
+      --accent: #b4637a;
+      --accent-600: #9d5570;
+      --accent-700: #7a4458;
+      --accent-100: #f6e4e0;
+      --sage: #286983;
+      --sage-100: #e5e6e2;
+      --sage-800: #1d4d62;
+      --bg: #faf4ed;
+      --surface: #fffaf3;
+      --ink: #575279;
+      --muted: #797593;
+      --line: #dfdad9;
+      --shadow: 0 3px 10px rgba(87, 82, 121, 0.1);
+    }
+    html[data-color-theme="flexoki"] {
+      --accent: #bc5215;
+      --accent-600: #9d4310;
+      --accent-700: #71320d;
+      --accent-100: #ffe7ce;
+      --sage: #66800b;
+      --sage-100: #edeecf;
+      --sage-800: #3d4c07;
+      --bg: #fffcf0;
+      --surface: #f2f0e5;
+      --ink: #100f0f;
+      --muted: #6f6e69;
+      --line: #e6e4d9;
+      --shadow: 0 3px 10px rgba(16, 15, 15, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Figtree", "Segoe UI", system-ui, sans-serif;
+      font-size: 19px;
+      line-height: 1.55;
+    }
+    img, svg { max-width: 100%; height: auto; display: block; }
+    a { color: var(--accent-600); }
+    .wrap { width: 100%; max-width: 980px; margin: 0 auto; padding: 20px 16px 80px; }
+    .hero, .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+    .hero { padding: 28px 26px 24px; margin-bottom: 22px; }
+    .card {
+      margin: 22px 0;
+      padding: 0 0 22px;
+      overflow: hidden;
+    }
+    .brand-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .h-mark {
+      width: 48px; height: 48px; border-radius: 13px; background: var(--accent); color: #fff;
+      font-family: Georgia, "Times New Roman", serif; font-size: 26px;
+      display: flex; align-items: center; justify-content: center; flex: none;
+    }
+    .eyebrow { font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .brand-row div div:last-child { font-size: 18px; font-weight: 700; }
+    h1 { font-size: clamp(2rem, 4.2vw, 2.55rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.03em; margin: 8px 0 14px; }
+    h1 span { color: var(--accent); }
+    .lead { color: var(--ink); max-width: 46ch; font-size: 1.15rem; line-height: 1.55; font-weight: 500; }
+    .lead strong { color: var(--accent-700); }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .toc a {
+      text-decoration: none; color: var(--ink); background: var(--bg); border: 1.5px solid var(--line);
+      border-radius: 999px; padding: 9px 14px; font-size: 15px; font-weight: 700;
+    }
+    .toc a:hover { border-color: var(--accent); color: var(--accent-600); }
+    .step-head {
+      display: flex; gap: 16px; align-items: flex-start; min-width: 0;
+      padding: 26px 26px 20px;
+      background:
+        linear-gradient(90deg, var(--accent) 0 7px, transparent 7px),
+        var(--bg);
+      border-bottom: 3px solid var(--accent);
+    }
+    .step-bullet {
+      width: 56px; height: 56px; border-radius: 999px; background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; flex: none;
+      box-shadow: 0 6px 16px rgba(219, 79, 27, 0.28);
+    }
+    .step-kicker {
+      font-size: 15px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .step-head h2, .card > h2 {
+      font-size: clamp(1.55rem, 3.2vw, 2.05rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .card > h2 { padding: 26px 26px 8px; }
+    .card > p, .card > ul, .card > ol {
+      margin: 0 26px 14px;
+      font-size: 1.12rem;
+      font-weight: 500;
+      line-height: 1.62;
+      color: var(--ink);
+    }
+    .card > ul, .card > ol { padding: 14px 18px 14px 2.1em; background: var(--bg); border-radius: 16px; }
+    .hint {
+      font-size: 16px; color: var(--ink); margin: 16px 8px 0; font-weight: 500;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--accent);
+      margin: 22px 26px 12px;
+      padding: 8px 16px;
+      border-radius: 999px;
+    }
+    .card > p.tag {
+      width: fit-content;
+      max-width: calc(100% - 52px);
+      margin: 22px 26px 12px;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #fff;
+    }
+    .shot {
+      margin: 0 18px 4px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(32, 30, 29, 0.22);
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(46, 43, 37, 0.16);
+    }
+    .shot button.zoom {
+      display: block; width: 100%; border: 0; padding: 0; background: #111; cursor: zoom-in;
+    }
+    .shot img {
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      object-position: top center;
+      vertical-align: top;
+    }
+    .shot.strip img { min-height: 72px; object-fit: contain; }
+    .caption {
+      font-size: 17px; color: #fbf0de; padding: 14px 18px 16px; background: var(--ink);
+      line-height: 1.45; font-weight: 500;
+    }
+    .caption strong { font-weight: 800; color: #fff; }
+    .do, .note {
+      margin: 8px 26px 6px; padding: 16px 18px; border-radius: 16px;
+      font-size: 1.08rem; font-weight: 650; line-height: 1.5;
+    }
+    .do { background: var(--sage); color: #fff; }
+    .note { background: var(--accent-100); color: var(--ink); border: 2px solid var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 26px 6px; }
+    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+    .mini { background: var(--bg); border: 2px solid var(--line); border-radius: 16px; padding: 16px 18px; min-width: 0; }
+    .mini h3 { font-size: 1.15rem; margin-bottom: 6px; font-weight: 800; }
+    .mini p { font-size: 1.02rem; color: var(--ink); font-weight: 500; }
+    .labels { display: grid; gap: 8px; margin: 16px 26px 8px; }
+    .lab { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-radius: 12px; padding: 12px 16px; font-weight: 700; font-size: 16px; color: #fff; }
+    .lab span { font-weight: 600; opacity: 0.95; font-size: 15px; }
+    .lab-exc { background: var(--sage-800); }
+    .lab-str { background: var(--sage); }
+    .lab-acc { background: #8a9a6e; }
+    .lab-mar { background: #c4a35a; color: var(--ink); }
+    .lab-nr { background: var(--accent); }
+    .lab-fail { background: var(--ink); }
+    html[data-color-theme="dawn"] .lab-acc { background: #56949f; }
+    html[data-color-theme="flexoki"] .lab-acc { background: #879a39; }
+    ol.plain, ul.plain { padding-left: 1.2em; margin: 10px 0; }
+    ol.plain li, ul.plain li { margin: 6px 0; }
+    .slogan { text-align: center; margin: 18px 26px 8px; font-size: 1.4rem; font-weight: 700; }
+    .slogan em { color: var(--accent); font-style: normal; }
+    .lightbox {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(32, 30, 29, 0.88);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 16px 16px 20px; cursor: zoom-out;
+    }
+    .lightbox[hidden] { display: none !important; }
+    .lightbox img {
+      max-width: 100%; max-height: calc(100% - 36px);
+      width: auto; height: auto; object-fit: contain;
+      border-radius: 10px; box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+    }
+    .lightbox p { color: #fff; font-size: 13px; margin-top: 10px; opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand-row">
+        <div class="h-mark" aria-hidden="true">H</div>
+        <div>
+          <div class="eyebrow">Haval LocalAI Benchmarking</div>
+          <div style="font-weight:600">Help guide</div>
+        </div>
+      </div>
+      <h1>How to use this app — <span>simply</span></h1>
+      <p class="lead">
+        One question: <strong>what size of local AI actually fits this PC</strong> for real jobs.
+        Not “which model is best in the world.” Pictures below are the real screens.
+        Click any picture to enlarge it.
+      </p>
+      <nav class="toc" aria-label="Jump to">
+        <a href="#s1">Start</a>
+        <a href="#s2">Doctor</a>
+        <a href="#s3">Models</a>
+        <a href="#s4">Guide</a>
+        <a href="#s5">Benchmark</a>
+        <a href="#s6">Reports</a>
+        <a href="#s7">Compare</a>
+        <a href="#s8">Settings</a>
+        <a href="#score">Scoring</a>
+        <a href="#arch">Architecture</a>
+      </nav>
+    </header>
+
+    <article class="card" id="s1">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">1</span>
+        <div>
+          <div class="step-kicker">Start</div>
+          <h2>Open the app and land on Home</h2>
+        </div>
+      </div>
+      <p>First you see a splash while Doctor checks this PC. Wait. You do not need a terminal. Then Home is the map: Home, Doctor, Models, Benchmark, Reports, Compare, Settings. The life-buoy opens this help.</p>
+      <p class="tag">Opening screen</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge splash screenshot">
+          <img src="media/app-splash.png" alt="Splash: Preparing your PC while Doctor checks this machine" />
+        </button>
+        <figcaption class="caption"><strong>Splash.</strong> Wait here while Doctor checks this PC. You do not need a terminal.</figcaption>
+      </figure>
+      <p class="tag">Home</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Home screenshot">
+          <img src="media/app-home.png" alt="Home screen with Guide me through and the five-step journey" />
+        </button>
+        <figcaption class="caption"><strong>Home.</strong> Orange button is Guide me through. Bottom row is your journey: Hardware → Models → Roles → Run → Report.</figcaption>
+      </figure>
+      <div class="do">When Home looks ready, click Guide me through. The rest of this help follows that path.</div>
+    </article>
+
+    <article class="card" id="s2">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">2</span>
+        <div>
+          <div class="step-kicker">Doctor</div>
+          <h2>Let Doctor check this PC</h2>
+        </div>
+      </div>
+      <p>Doctor confirms Windows pieces, the local model runner (Ollama), storage, and that acceleration is real.</p>
+      <ul class="plain">
+        <li>While it runs you may see “Checking this PC…” — wait; do not close the app.</li>
+        <li><strong>Needs attention</strong> — something failed. Use the repair button on that page. Stay in the app.</li>
+        <li><strong>Everything is ready</strong> — you can benchmark. The header pill should say Ready before a long run.</li>
+      </ul>
+      <p class="tag">Ready</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Doctor screenshot">
+          <img src="media/app-doctor.png" alt="Doctor tab when everything passed" />
+        </button>
+        <figcaption class="caption"><strong>Doctor — ready.</strong> Green checks. You can re-run checks from this page anytime.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="s3">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">3</span>
+        <div>
+          <div class="step-kicker">Models</div>
+          <h2>Download or pick a model</h2>
+        </div>
+      </div>
+      <p>Open <strong>Models</strong>. Packs live on this PC through Ollama. Scoring does not send answers to a public chat website. One model per report.</p>
+      <p class="tag">Installed — empty</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge empty Models screenshot">
+          <img src="media/app-models-empty.png" alt="Models Installed filter with no models yet" />
+        </button>
+        <figcaption class="caption"><strong>Installed, empty.</strong> Switch to Preferred or Search Ollama and download one.</figcaption>
+      </figure>
+      <p class="tag">Preferred</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Preferred models screenshot">
+          <img src="media/app-models-preferred.png" alt="Models Preferred roster to download from" />
+        </button>
+        <figcaption class="caption"><strong>Preferred.</strong> A short roster we suggest for this PC. Download from here if you are not sure what to pick.</figcaption>
+      </figure>
+      <p class="tag">Search Ollama</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Search Ollama screenshot">
+          <img src="media/app-models-search.png" alt="Models Search Ollama filter" />
+        </button>
+        <figcaption class="caption"><strong>Search Ollama.</strong> Type a name if you already know which pack you want.</figcaption>
+      </figure>
+      <p class="tag">Downloading</p>
+      <figure class="shot strip">
+        <button type="button" class="zoom" aria-label="Enlarge downloading screenshot">
+          <img src="media/app-models-downloading.png" alt="Models download progress" />
+        </button>
+        <figcaption class="caption"><strong>Downloading.</strong> Leave this window open until it finishes. Then it appears under Installed.</figcaption>
+      </figure>
+      <p class="tag">Installed — with models</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge installed models screenshot">
+          <img src="media/app-models.png" alt="Models Installed list with one model ticked" />
+        </button>
+        <figcaption class="caption"><strong>Installed.</strong> Tick the one this run should test.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="s4">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">4</span>
+        <div>
+          <div class="step-kicker">Guide me through</div>
+          <h2>The guided setup (intro, then work)</h2>
+        </div>
+      </div>
+      <p>From Home, <strong>Guide me through</strong> fills this window. Most steps come in a pair: an illustrated intro with <strong>OK, let’s go</strong>, then the working screen. If nothing is installed, you only get the first picture below.</p>
+
+      <p class="tag">If no model is installed</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge no-model guide screenshot">
+          <img src="media/app-guide-no-model.png" alt="Guide: No model to test yet" />
+        </button>
+        <figcaption class="caption"><strong>Need a model first.</strong> Search or Go to Models, download one, then start the guide again.</figcaption>
+      </figure>
+
+      <p class="tag">Step 1 intro — OK, let’s go</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 1 intro">
+          <img src="media/app-guide-brief-1.png" alt="Guide step 1 intro: Choose the model to test" />
+        </button>
+        <figcaption class="caption"><strong>Intro.</strong> “Choose the model to test.” Click OK, let’s go.</figcaption>
+      </figure>
+      <p class="tag">Step 1 work — pick the model</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 1 work">
+          <img src="media/app-wizard-model.png" alt="Guide: Which model should we test?" />
+        </button>
+        <figcaption class="caption"><strong>Work.</strong> “Which model should we test?” Pick one installed row, then Next.</figcaption>
+      </figure>
+
+      <p class="tag">Step 2 intro — OK, let’s go</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 2 intro">
+          <img src="media/app-guide-brief-2.png" alt="Guide step 2 intro: Choose your personas" />
+        </button>
+        <figcaption class="caption"><strong>Intro.</strong> “Choose your personas.” A persona is a real customer role.</figcaption>
+      </figure>
+      <p class="tag">Step 2 work — roles</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 2 work">
+          <img src="media/app-wizard-personas.png" alt="Guide: Who is this test for?" />
+        </button>
+        <figcaption class="caption"><strong>Work.</strong> Home / Play / Work. Keep all 20, or clear a group and tick only what you care about. Each role has its own idea of “fast enough.”</figcaption>
+      </figure>
+
+      <p class="tag">Step 3 intro — OK, let’s go</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 3 intro">
+          <img src="media/app-guide-brief-3.png" alt="Guide step 3 intro: Thinking on or off" />
+        </button>
+        <figcaption class="caption"><strong>Intro.</strong> “Thinking on or off?” Off is the usual default.</figcaption>
+      </figure>
+      <p class="tag">Step 3 work — thinking</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 3 work">
+          <img src="media/app-wizard-think.png" alt="Guide: Should the model think first?" />
+        </button>
+        <figcaption class="caption"><strong>Work.</strong> Thinking Off answers sooner. Thinking On can take much longer — the bench waits until thinking is done.</figcaption>
+      </figure>
+      <div class="grid-2">
+        <div class="mini"><h3>Thinking Off</h3><p>First pass on everyday speed.</p></div>
+        <div class="mini"><h3>Thinking On</h3><p>Only when careful reasoning matters more than a snappy reply.</p></div>
+      </div>
+
+      <p class="tag">Step 4 intro — OK, let’s go</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 4 intro">
+          <img src="media/app-guide-brief-4.png" alt="Guide step 4 intro: Save the final report" />
+        </button>
+        <figcaption class="caption"><strong>Intro.</strong> “Save the final report (optional).” The app already keeps a copy.</figcaption>
+      </figure>
+      <p class="tag">Step 4 work — save and start</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge guide step 4 work">
+          <img src="media/app-wizard-report.png" alt="Guide: Where should we save the report?" />
+        </button>
+        <figcaption class="caption"><strong>Work.</strong> Optional extra folder, then <strong>Start benchmark</strong>.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="s5">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">5</span>
+        <div>
+          <div class="step-kicker">Benchmark</div>
+          <h2>Watch the run — or pause / stop</h2>
+        </div>
+      </div>
+      <p>You can also start from the Benchmark tab without the guide. Progress, RAM / VRAM / CPU, and the current question show live. Stop still keeps whatever finished.</p>
+      <p class="tag">Idle — not started yet</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge idle Benchmark screenshot">
+          <img src="media/app-benchmark-idle.png" alt="Benchmark tab ready to start" />
+        </button>
+        <figcaption class="caption"><strong>Ready to benchmark.</strong> Start Benchmark if you skipped the guide.</figcaption>
+      </figure>
+      <p class="tag">Running</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge running Benchmark screenshot">
+          <img src="media/app-benchmark.png" alt="Benchmark in progress with Pause and Stop" />
+        </button>
+        <figcaption class="caption"><strong>In progress.</strong> Let the PC work. A full run can take a while on a large model.</figcaption>
+      </figure>
+      <p class="tag">Paused</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge paused Benchmark screenshot">
+          <img src="media/app-benchmark-paused.png" alt="Benchmark paused with Resume and Stop" />
+        </button>
+        <figcaption class="caption"><strong>Paused.</strong> Resume when you are ready, or Stop to keep a partial report.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="s6">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">6</span>
+        <div>
+          <div class="step-kicker">Reports</div>
+          <h2>Open what this PC produced</h2>
+        </div>
+      </div>
+      <p>If you have not finished a run yet, Reports says there are no runs stored — that is normal. After a run, read the match labels first (Excellent, Strong, and so on). Ask: did this size feel usable for the roles I picked, on this hardware?</p>
+      <p class="tag">Library</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Reports library screenshot">
+          <img src="media/app-reports.png" alt="Reports library of saved runs" />
+        </button>
+        <figcaption class="caption"><strong>Your benchmark library.</strong> Open a row, Compare, or Delete.</figcaption>
+      </figure>
+      <p class="tag">One report</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge report detail screenshot">
+          <img src="media/app-reports-detail.png" alt="One saved report with Open report, PDF, Folder, Delete" />
+        </button>
+        <figcaption class="caption"><strong>Opened from the list.</strong> Open report, PDF, Folder, or Delete this run.</figcaption>
+      </figure>
+      <p class="tag">Choose what to remove</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge delete picker screenshot">
+          <img src="media/app-reports-delete.png" alt="Delete reports picker with tick boxes" />
+        </button>
+        <figcaption class="caption"><strong>Delete picker.</strong> Tick the runs to remove from this PC, then Delete.</figcaption>
+      </figure>
+      <p class="tag">Confirm</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge delete confirm screenshot">
+          <img src="media/app-delete-confirm.png" alt="Confirm delete dialog" />
+        </button>
+        <figcaption class="caption"><strong>Are you sure?</strong> This completely removes those reports from this PC.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="s7">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">7</span>
+        <div>
+          <div class="step-kicker">Compare</div>
+          <h2>Put two (or more) reports on one page</h2>
+        </div>
+      </div>
+      <p><strong>Compare does not run the bench again.</strong> It builds one page from reports you already have — for example a small model vs a larger one on this PC. If the list is empty, finish at least two benchmarks first (or upload saved HTML).</p>
+      <p class="tag">First visit — OK, let’s do it</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Compare intro screenshot">
+          <img src="media/app-compare-intro.png" alt="Compare intro: Compare Different LLM model sizes" />
+        </button>
+        <figcaption class="caption"><strong>Intro.</strong> Same PC. Different LLM sizes. Click OK, let’s do it.</figcaption>
+      </figure>
+      <p class="tag">Pick reports</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Compare picker screenshot">
+          <img src="media/app-compare.png" alt="Compare screen with saved reports to tick" />
+        </button>
+        <figcaption class="caption"><strong>Work.</strong> Tick reports from at least two different models, then Run comparison.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="s8">
+      <div class="step-head">
+        <span class="step-bullet" aria-hidden="true">8</span>
+        <div>
+          <div class="step-kicker">Settings</div>
+          <h2>Folder, color, updates</h2>
+        </div>
+      </div>
+      <p>Color theme changes the whole app, including this help page. Layout stays the same; only the palette changes.</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge Settings screenshot">
+          <img src="media/app-settings.png" alt="Settings: report folder, color theme, updates" />
+        </button>
+        <figcaption class="caption"><strong>Preferences.</strong> Extra report folder, Haval / Classic / Dawn / Flexoki, and Update.</figcaption>
+      </figure>
+    </article>
+
+    <article class="card" id="score">
+      <h2 style="margin-bottom:8px">How judgment and scores are decided</h2>
+      <p>Scoring is a funnel. We do not average a slow disaster with a pretty paragraph and call it a win.</p>
+      <ol class="plain">
+        <li><strong>Did it finish?</strong> If it never produced an answer, that is <strong>Failed</strong> — not “slow.”</li>
+        <li><strong>Was it far too slow for that role?</strong> If yes, it is <strong>Not recommended</strong> even if the text looks excellent.</li>
+        <li><strong>Combined score.</strong> About half is everyday role work (Phase 1). About half is a skill pack (Phase 2). Skills are weighted by the role — an engineer needs coding; a family coordinator does not.</li>
+        <li><strong>Role floors.</strong> Some jobs refuse a label if a required skill is too weak.</li>
+        <li><strong>Final match label</strong> from the scale below.</li>
+      </ol>
+      <p class="tag">The funnel</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge judgment diagram">
+          <img src="media/judgment.jpg" alt="How judgment works: finish, speed, combined score, role floors, labels" />
+        </button>
+        <figcaption class="caption">Finish first, then speed, then the 50 / 50 mix, then role floors, then a label. Click to enlarge.</figcaption>
+      </figure>
+      <div class="labels">
+        <div class="lab lab-exc">Excellent <span>88 and up</span></div>
+        <div class="lab lab-str">Strong <span>75–87</span></div>
+        <div class="lab lab-acc">Acceptable <span>62–74</span></div>
+        <div class="lab lab-mar">Marginal match <span>48–61</span></div>
+        <div class="lab lab-nr">Not recommended <span>below 48, or blocked by speed / a role floor</span></div>
+        <div class="lab lab-fail">Failed <span>no usable finish</span></div>
+      </div>
+      <p class="slogan">Size is not the winner. <em>Fit is.</em></p>
+    </article>
+
+    <article class="card" id="arch">
+      <h2 style="margin-bottom:8px">How the app is put together (short)</h2>
+      <p>You see <strong>one window</strong>. On this PC, helpers work together locally:</p>
+      <div class="grid-2">
+        <div class="mini"><h3>The screens</h3><p>Home, Doctor, Models, Benchmark, Reports, Compare, Settings.</p></div>
+        <div class="mini"><h3>The engine</h3><p>Local helper that runs Doctor, scores answers, and writes HTML reports.</p></div>
+        <div class="mini"><h3>Ollama</h3><p>Local model server. It generates answers. It does not grade them.</p></div>
+        <div class="mini"><h3>Your files</h3><p>Settings, history, and reports stay under this Windows user account.</p></div>
+      </div>
+      <p style="margin-top:12px">Click → screens ask the engine → the engine asks Ollama for text → this PC grades the text → a report is saved.</p>
+      <p class="tag">The local loop</p>
+      <figure class="shot">
+        <button type="button" class="zoom" aria-label="Enlarge architecture animation">
+          <img src="media/architecture.gif" alt="Animated diagram of the desktop app, local engine, and Ollama" />
+        </button>
+        <figcaption class="caption">This animation loops. One PC, local loop, hardware-first report.</figcaption>
+      </figure>
+    </article>
+
+    <p class="hint">Escape or Close leaves this guide. Click a picture to enlarge; click again or Escape to close the zoom. Alt+1 through Alt+7 jump tabs in the app.</p>
+  </div>
+
+  <div class="lightbox" id="lb" hidden>
+    <img id="lb-img" alt="" />
+    <p>Click anywhere or press Escape to close</p>
+  </div>
+
+  <script>
+    (function () {
+      function applyTheme(theme) {
+        var root = document.documentElement;
+        var next = !theme || theme === "current" ? "current" : theme;
+        root.removeAttribute("data-color-theme");
+        void root.offsetWidth;
+        root.setAttribute("data-color-theme", next);
+      }
+      var q = new URLSearchParams(location.search).get("theme");
+      applyTheme(q);
+      window.addEventListener("message", function (e) {
+        var data = e.data || {};
+        if (data.type === "haval-color-theme") applyTheme(data.theme);
+      });
+
+      var lb = document.getElementById("lb");
+      var lbImg = document.getElementById("lb-img");
+      function closeLb() {
+        lb.hidden = true;
+        lbImg.removeAttribute("src");
+      }
+      document.querySelectorAll("button.zoom").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var img = btn.querySelector("img");
+          if (!img) return;
+          lbImg.src = img.currentSrc || img.src;
+          lbImg.alt = img.alt || "";
+          lb.hidden = false;
+        });
+      });
+      lb.addEventListener("click", closeLb);
+      window.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !lb.hidden) {
+          e.stopPropagation();
+          closeLb();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

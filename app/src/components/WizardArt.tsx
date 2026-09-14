@@ -5,10 +5,10 @@ type ArtProps = { className?: string };
 const ink = "#1a1a1a";
 const soft = "#8a857d";
 const paper = "#fffdf8";
-const cream = "#f6f1e9";
+const cream = "#fbf0de";
 const accent = "#db4f1b";
-const blush = "#f4dcd0";
-const ok = "#287653";
+const blush = "#ffe9e0";
+const ok = "#7a8a5e";
 const info = "#456a87";
 
 export function WizardArtModel({ className }: ArtProps) {
@@ -89,10 +89,10 @@ export function WizardArtThink({ className }: ArtProps) {
         <circle className="wa-dot2" cx="232" cy="112" r="3.5" fill={accent} opacity="0.7" />
         <circle className="wa-dot3" cx="198" cy="128" r="3" fill={ink} />
       </g>
-      <text x="52" y="178" fill={ink} fontSize="11" fontWeight="700" fontFamily="Segoe UI, sans-serif">
+      <text x="52" y="178" fill={ink} fontSize="11" fontWeight="500" fontFamily="Segoe UI, sans-serif">
         Off — answer now
       </text>
-      <text x="176" y="178" fill={ink} fontSize="11" fontWeight="700" fontFamily="Segoe UI, sans-serif">
+      <text x="176" y="178" fill={ink} fontSize="11" fontWeight="500" fontFamily="Segoe UI, sans-serif">
         On — think first
       </text>
     </svg>

@@ -1,15 +1,19 @@
+import { useEffect, useMemo, useRef } from "react";
 import { Icon } from "../components/Icon";
 import type { LibraryItem, LibraryResponse, ModelFilter } from "../types";
 
-const FILTERS: ModelFilter[] = ["Installed", "Preferred", "Search Ollama"];
+const BASE_FILTERS: ModelFilter[] = ["Installed", "Preferred", "Search Ollama"];
+const OPEN_DOWNLOAD = ["queued", "downloading", "verifying", "paused", "failed"];
 
 type Props = {
   filter: ModelFilter;
   query: string;
   library: LibraryResponse | null;
+  focusSearch?: boolean;
   onFilter: (f: ModelFilter) => void;
   onQuery: (q: string) => void;
   onToggle: (name: string, selected: boolean) => void;
+  onRefresh: () => void;
   onDownload: (name: string) => void;
   onCancel: (jobId: string) => void;
   onRetry: (jobId: string) => void;
@@ -20,8 +24,10 @@ export function ModelsScreen({
   filter,
   query,
   library,
+  focusSearch,
   onFilter,
   onQuery,
+  onRefresh,
   onToggle,
   onDownload,
   onCancel,
@@ -29,7 +35,25 @@ export function ModelsScreen({
   onRemove,
 }: Props) {
   const rows = library?.items ?? [];
+  const searchRef = useRef<HTMLInputElement>(null);
   const free = library?.storage?.free_gb;
+  const openJobs = useMemo(
+    () => (library?.jobs ?? []).filter((j) => OPEN_DOWNLOAD.includes(j.state)),
+    [library?.jobs],
+  );
+  const filters = useMemo<ModelFilter[]>(() => {
+    if (!openJobs.length && filter !== "Downloading") return BASE_FILTERS;
+    return ["Installed", "Preferred", "Downloading", "Search Ollama"];
+  }, [openJobs.length, filter]);
+
+  useEffect(() => {
+    if (!focusSearch) return;
+    searchRef.current?.focus();
+  }, [focusSearch]);
+
+  useEffect(() => {
+    if (filter === "Downloading" && openJobs.length === 0) onFilter("Installed");
+  }, [filter, openJobs.length, onFilter]);
   const total = library?.storage?.total_gb;
   const usedPct = free != null && total ? Math.min(100, Math.round(((total - free) / total) * 100)) : 0;
 
@@ -72,6 +96,7 @@ export function ModelsScreen({
             Search models
           </span>
           <input
+            ref={searchRef}
             value={query}
             onChange={(e) => {
               onQuery(e.target.value);
@@ -81,12 +106,16 @@ export function ModelsScreen({
           />
         </label>
         <div className="segmented" role="tablist" aria-label="Model source">
-          {FILTERS.map((f) => (
+          {filters.map((f) => (
             <button key={f} className={filter === f ? "active" : ""} onClick={() => onFilter(f)} role="tab" aria-selected={filter === f}>
-              {f}
+              {f === "Downloading" && openJobs.length ? `Downloading (${openJobs.length})` : f}
             </button>
           ))}
         </div>
+        <button className="btn secondary" type="button" onClick={onRefresh}>
+          <Icon name="refresh-cw" size={15} />
+          Refresh list
+        </button>
       </div>
 
       {library && !library.ollama_ok ? (
@@ -108,7 +137,9 @@ export function ModelsScreen({
                 : "Type a model name to search the Ollama library. Results list names, tags, parameters, and precision/quant. Download uses that exact ollama pull command."
               : filter === "Preferred"
                 ? "The five-model Standard Roster will appear here."
-                : "No models are installed on this PC yet."}
+                : filter === "Downloading"
+                  ? "No downloads in progress."
+                  : "No models are installed on this PC yet."}
           </div>
         ) : null}
         {rows.map((m) => (
@@ -147,8 +178,9 @@ function ModelRow({
   const state = dl?.state;
   const downloading = state === "queued" || state === "downloading" || state === "verifying";
   const failed = state === "failed";
+  const completed = state === "completed";
   const installed = !!item.installed && !downloading;
-  const available = !installed && !downloading;
+  const available = !installed && !downloading && !failed && !completed;
   const totalB = item.params_total && item.params_total !== "—" ? item.params_total : null;
   const activeB = item.params_active && item.params_active !== "—" ? item.params_active : totalB;
   const quant = (item.quant || "").trim();
@@ -183,15 +215,15 @@ function ModelRow({
         <Icon name="box" size={19} />
       </div>
       <div style={{ flex: 1, minWidth: 180 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ fontSize: 15, fontWeight: 500, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           {item.display_name || item.name}
           {item.tag ? (
-            <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--ink-faint)", border: "1px solid var(--border)", borderRadius: 5, padding: "1px 6px", background: "var(--canvas)" }}>
+            <span style={{ fontSize: 10.5, fontWeight: 500, color: "var(--ink-faint)", border: "1px solid var(--border)", borderRadius: 5, padding: "1px 6px", background: "var(--canvas)" }}>
               {item.tag}
             </span>
           ) : null}
           {item.preferred ? (
-            <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--accent-text)" }}>Preferred</span>
+            <span style={{ fontSize: 10.5, fontWeight: 500, color: "var(--accent-text)" }}>Preferred</span>
           ) : null}
         </div>
         <div className="param-line">
@@ -207,7 +239,14 @@ function ModelRow({
         <strong>{totalB || "—"}</strong>
       </div>
       <div className="param-col active-col">
-        <span className="param-col-kicker">Active</span>
+        <span className="param-col-kicker">
+          Active
+          {item.params_checked ? (
+            <span className="param-checked" title="Confirmed from the Ollama library card">
+              <Icon name="check" size={10} />
+            </span>
+          ) : null}
+        </span>
         <strong>{activeB || "—"}</strong>
       </div>
       <div className="param-col quant-col">
@@ -219,7 +258,7 @@ function ModelRow({
           <div style={{ width: "100%" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--ink-soft)", marginBottom: 5 }}>
               <span>{dl?.stage || "Downloading"}</span>
-              <span style={{ fontWeight: 600, color: "var(--ink)" }}>{dl?.pct ?? 0}%</span>
+              <span style={{ fontWeight: 500, color: "var(--ink)" }}>{dl?.pct ?? 0}%</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
               <div className={`progress${state === "downloading" ? " striped" : ""}`} style={{ flex: 1 }}>
@@ -257,6 +296,11 @@ function ModelRow({
             <Icon name="download" size={15} />
             Download
           </button>
+        ) : null}
+        {completed && !installed ? (
+          <div className="status-pill" style={{ background: "var(--ok-bg)", color: "var(--ok)", padding: "6px 14px" }}>
+            Downloaded — refresh the list
+          </div>
         ) : null}
         {failed && !downloading ? (
           <button className="btn secondary" style={{ height: 38 }} onClick={() => dl?.id && onRetry(dl.id)}>

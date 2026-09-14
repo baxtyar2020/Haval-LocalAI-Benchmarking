@@ -214,9 +214,13 @@ class RunStore:
             folder = runs_dir() / rid
             if (folder / "report.html").is_file() or (folder / "results.xlsx").is_file():
                 continue
+            att = self.conn.execute("SELECT COUNT(*) FROM attempts WHERE run_id=?", (rid,)).fetchone()[0]
+            sc = self.conn.execute("SELECT COUNT(*) FROM scenario_scores WHERE run_id=?", (rid,)).fetchone()[0]
+            if att or sc:
+                continue
             self.delete_run(rid)
 
-    def list_runs(self, limit: int = 20) -> list[dict]:
+    def list_runs(self, limit: int = 200) -> list[dict]:
         self.prune_ghost_runs()
         cur = self.conn.execute("SELECT * FROM runs ORDER BY started_at DESC LIMIT ?", (limit,))
         return [dict(r) for r in cur.fetchall()]

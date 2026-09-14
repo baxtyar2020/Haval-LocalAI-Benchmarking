@@ -1,4 +1,4 @@
-export type TabId = "home" | "doctor" | "models" | "benchmark" | "reports" | "settings";
+export type TabId = "home" | "doctor" | "models" | "benchmark" | "reports" | "compare" | "settings";
 
 export type RepairState = "attention" | "repairing" | "ready" | "checking";
 export type BenchState = "idle" | "running" | "paused";
@@ -37,7 +37,7 @@ export type EngineRun = {
   summary_json?: string;
   headline?: string;
 };
-export type ModelFilter = "Installed" | "Preferred" | "Search Ollama";
+export type ModelFilter = "Installed" | "Preferred" | "Downloading" | "Search Ollama";
 export type FitLevel = "exc" | "str" | "mar" | "no";
 
 export type CatalogModel = {
@@ -62,6 +62,7 @@ export type LibraryItem = {
   params_total?: string;
   params_active?: string;
   params_moe?: boolean;
+  params_checked?: boolean;
   params_label?: string;
   pull_command?: string;
   quant?: string;
@@ -83,10 +84,20 @@ export type LibraryItem = {
   };
 };
 
+export type LibraryJob = {
+  id: string;
+  name: string;
+  state: string;
+  pct: number;
+  stage?: string;
+  error?: string | null;
+};
+
 export type LibraryResponse = {
   ollama_ok: boolean;
   storage: { free_gb?: number; total_gb?: number };
   accel_gb?: number;
+  jobs?: LibraryJob[];
   items: LibraryItem[];
   selected: string[];
   installed_count?: number;

@@ -1,3 +1,6 @@
+mod titlebar;
+mod update;
+
 use serde::Serialize;
 use std::net::{SocketAddr, TcpStream};
 use std::path::{Path, PathBuf};
@@ -26,6 +29,7 @@ pub struct EngineInfo {
 #[derive(Clone)]
 struct SpawnSpec {
     python: PathBuf,
+    node: Option<PathBuf>,
     engine_dir: PathBuf,
     repo_root: PathBuf,
     port: u16,
@@ -102,6 +106,33 @@ fn find_python(search_roots: &[PathBuf]) -> Option<PathBuf> {
         .into_iter()
         .find(|cmd| python_available(cmd))
         .map(PathBuf::from)
+}
+
+fn find_node(search_roots: &[PathBuf]) -> Option<PathBuf> {
+    for root in search_roots {
+        for rel in [
+            "node/node.exe",
+            "installer/runtime/node/node.exe",
+            "runtime/node/node.exe",
+        ] {
+            let candidate = root.join(rel);
+            if candidate.is_file() {
+                return Some(candidate);
+            }
+        }
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let beside = dir.join("node").join("node.exe");
+            if beside.is_file() {
+                return Some(beside);
+            }
+        }
+    }
+    if python_available("node") {
+        return Some(PathBuf::from("node"));
+    }
+    None
 }
 
 fn collect_roots(resource: &Path) -> Vec<PathBuf> {
@@ -198,7 +229,11 @@ main()"
         .env("PYTHONPATH", &spec.engine_dir)
         .env("HAVAL_REPO_ROOT", &spec.repo_root)
         .env("HAVAL_CONFIG_DIR", spec.repo_root.join("config"))
-        .args(["-c", &boot])
+        .env("HAVAL_PYTHON_EXE", &spec.python);
+    if let Some(node) = &spec.node {
+        cmd.env("HAVAL_NODE_EXE", node);
+    }
+    cmd.args(["-c", &boot])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(engine_stderr());
@@ -245,6 +280,7 @@ fn spawn_engine(base: &Path) -> (Option<Child>, EngineInfo, Option<SpawnSpec>) {
     let url = format!("http://127.0.0.1:{port}");
     let spec = SpawnSpec {
         python,
+        node: find_node(&roots),
         engine_dir,
         repo_root: repo,
         port,
@@ -334,18 +370,7 @@ fn engine_info(state: State<EngineProcess>) -> EngineInfo {
 }
 
 /// Proxy UI → bench engine so WebView CORS cannot block Doctor.
-#[tauri::command]
-fn engine_request(
-    state: State<EngineProcess>,
-    method: String,
-    path: String,
-    body: Option<String>,
-) -> Result<String, String> {
-    let info = state
-        .info
-        .lock()
-        .map(|g| g.clone())
-        .unwrap_or_else(|e| e.into_inner().clone());
+fn engine_request_blocking(info: EngineInfo, method: String, path: String, body: Option<String>) -> Result<String, String> {
     if info.url.is_empty() || info.token.is_empty() {
         return Err(info
             .error
@@ -353,16 +378,21 @@ fn engine_request(
     }
     let url = format!("{}{}", info.url, path);
     let auth = format!("Bearer {}", info.token);
+    let timeout = if method.eq_ignore_ascii_case("GET") {
+        Duration::from_secs(4)
+    } else {
+        Duration::from_secs(30)
+    };
     let result = if method.eq_ignore_ascii_case("POST") {
         ureq::post(&url)
             .set("Authorization", &auth)
             .set("Content-Type", "application/json")
-            .timeout(Duration::from_secs(30))
+            .timeout(timeout)
             .send_string(body.as_deref().unwrap_or("{}"))
     } else {
         ureq::get(&url)
             .set("Authorization", &auth)
-            .timeout(Duration::from_secs(30))
+            .timeout(timeout)
             .call()
     };
     match result {
@@ -374,6 +404,23 @@ fn engine_request(
         }
         Err(e) => Err(e.to_string()),
     }
+}
+
+#[tauri::command]
+async fn engine_request(
+    state: State<'_, EngineProcess>,
+    method: String,
+    path: String,
+    body: Option<String>,
+) -> Result<String, String> {
+    let info = state
+        .info
+        .lock()
+        .map(|g| g.clone())
+        .unwrap_or_else(|e| e.into_inner().clone());
+    tauri::async_runtime::spawn_blocking(move || engine_request_blocking(info, method, path, body))
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -406,6 +453,10 @@ fn open_with_os(path: String) -> Result<(), String> {
             c
         };
         let status = cmd.status().map_err(|e| e.to_string())?;
+        // Explorer often returns a non-zero code even after opening the folder.
+        if p.is_dir() {
+            return Ok(());
+        }
         if !status.success() {
             return Err("Windows could not open that path.".into());
         }
@@ -471,7 +522,7 @@ fn restart_engine(app: AppHandle) -> EngineInfo {
     restart_engine_inner(&app)
 }
 
-fn stop_engine(app: &AppHandle) {
+pub(crate) fn stop_engine(app: &AppHandle) {
     SHUTTING_DOWN.store(true, Ordering::SeqCst);
     if let Some(state) = app.try_state::<EngineProcess>() {
         if let Ok(mut child) = state.child.lock() {
@@ -488,6 +539,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(move |app| {
+            app.manage(update::UpdateHub::new());
             app.manage(EngineProcess {
                 info: Mutex::new(EngineInfo {
                     url: String::new(),
@@ -521,10 +573,16 @@ pub fn run() {
             });
             start_watchdog(app.handle().clone());
             if let Some(window) = app.get_webview_window("main") {
+                titlebar::apply_default(&window);
                 let _ = window.center();
                 let _ = window.show();
                 let _ = window.set_focus();
             }
+            let update_handle = app.handle().clone();
+            thread::spawn(move || {
+                thread::sleep(Duration::from_secs(3));
+                update::run_check(&update_handle);
+            });
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -532,7 +590,12 @@ pub fn run() {
             engine_request,
             restart_engine,
             pick_report_folder,
-            open_with_os
+            open_with_os,
+            titlebar::set_titlebar_theme,
+            update::update_status,
+            update::update_check,
+            update::update_download,
+            update::update_apply
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

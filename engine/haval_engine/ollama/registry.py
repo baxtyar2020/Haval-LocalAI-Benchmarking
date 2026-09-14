@@ -147,10 +147,19 @@ def _hit(name: str, description: str = "") -> dict[str, Any]:
 
 
 def _expand_library(slug: str, query: str) -> list[dict[str, Any]]:
+    readme = ""
+    try:
+        from haval_engine.models.param_cards import confirm_from_html, parse_library_param_cards, pick_card, remember_checked
+
+        readme = _fetch(f"https://ollama.com/library/{urllib.parse.quote(slug)}")
+        confirm_from_html(readme, slug, slug=slug)
+        page_cards = parse_library_param_cards(readme, slug=slug)
+    except Exception:
+        page_cards = {}
     html = _fetch(f"https://ollama.com/library/{urllib.parse.quote(slug)}/tags")
     tags = parse_model_tags(html, slug)
     if not tags:
-        html = _fetch(f"https://ollama.com/library/{urllib.parse.quote(slug)}")
+        html = readme or _fetch(f"https://ollama.com/library/{urllib.parse.quote(slug)}")
         tags = parse_model_tags(html, slug)
     exact = slug.lower() == query.lower() or query.lower() == f"{slug}:".lower()
     if not tags:
@@ -160,7 +169,14 @@ def _expand_library(slug: str, query: str) -> list[dict[str, Any]]:
         chosen = chosen[:80]
     else:
         chosen = chosen[:16]
-    return [_hit(f"{slug}:{tag}") for tag in chosen]
+    out = []
+    for tag in chosen:
+        name = f"{slug}:{tag}"
+        pack = pick_card(page_cards, name) if page_cards else None
+        if pack:
+            remember_checked(name, pack)
+        out.append(_hit(name))
+    return out
 
 
 def search_models(query: str) -> list[dict[str, Any]]:
@@ -170,6 +186,12 @@ def search_models(query: str) -> list[dict[str, Any]]:
     if q.startswith("hf.co/") or ("/" in q and not q.startswith("http")):
         return [_hit(q, "Hugging Face / namespace reference")]
     if ":" in q and "/" not in q.split(":")[0]:
+        try:
+            from haval_engine.models.param_cards import request_confirm
+
+            request_confirm([q])
+        except Exception:
+            pass
         return [_hit(q, "Exact Ollama tag")]
 
     try:

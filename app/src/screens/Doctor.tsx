@@ -162,7 +162,7 @@ export function DoctorScreen({ snapshot, showTech, sequenceHelp, onRun, onRepair
               </div>
               {step >= 0 ? <div className="step-badge">{step + 1}</div> : null}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 600 }}>{c.title}</div>
+                <div style={{ fontSize: 15, fontWeight: 500 }}>{c.title}</div>
                 <div style={{ fontSize: 13, color: "var(--ink-soft)", marginTop: 2 }}>{c.detail}</div>
               </div>
               <div className="status-pill" style={{ background: st.bg, color: st.fg }}>

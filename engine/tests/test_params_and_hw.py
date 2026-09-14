@@ -37,6 +37,16 @@ def test_known_cards_from_installed_names():
     flash = parse_params("bluehawana/deepseek-v4-flash:iq2_m")
     assert flash["total"] == "284B"
     assert flash["active"] == "13B"
+    maverick = parse_params("401.6B", "llama4:maverick")
+    assert maverick["total"] == "400B"
+    assert maverick["active"] == "17B"
+    assert maverick["moe"] is True
+    coder_v2 = parse_params("235.7B", "deepseek-coder-v2:236b")
+    assert coder_v2["total"] == "236B"
+    assert coder_v2["active"] == "21B"
+    scout = parse_params("llama4:scout")
+    assert scout["total"] == "109B"
+    assert scout["active"] == "17B"
     from haval_engine.models.params import total_b_value
     from haval_engine.models.library import _params_size_sort_key
 

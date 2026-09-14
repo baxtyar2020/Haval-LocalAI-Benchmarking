@@ -16,6 +16,11 @@ _DENSE = re.compile(r"(?P<n>[\d.]+)\s*B\b", re.IGNORECASE)
 # Official cards (total / active per token). Match the model id, pull tag, or HF path.
 # Sources: Google Gemma 4 card, Qwen HF cards, OpenAI gpt-oss card, Moonshot Kimi Linear, DeepSeek V4 Flash.
 _KNOWN: tuple[tuple[re.Pattern[str], str, str, bool], ...] = (
+    (re.compile(r"llama[-_]?4[:\s/_-]*(maverick|128x17b)", re.I), "400B", "17B", True),
+    (re.compile(r"llama[-_]?4", re.I), "109B", "17B", True),
+    (re.compile(r"deepseek[-_]?coder[-_]?v2[:\s/_-]*236", re.I), "236B", "21B", True),
+    (re.compile(r"deepseek[-_]?coder[-_]?v2", re.I), "16B", "2.4B", True),
+    (re.compile(r"deepseek[-_]?v3(?![-_.]?\d)", re.I), "671B", "37B", True),
     (re.compile(r"kimi[-_/ ]?linear|48b[-_]?a3b", re.I), "48B", "3B", True),
     (re.compile(r"qwen3-coder-next|qwen3_coder_next|coder-next", re.I), "80B", "3B", True),
     (re.compile(r"qwen3-coder(?!-next)|qwen3_coder(?!_next)|coder-30b-a3b", re.I), "30B", "3.3B", True),
@@ -72,12 +77,13 @@ def _from_count(n: int | float) -> str:
     return format_b(n)
 
 
-def _pack(total: str, active: str, moe: bool) -> dict:
+def _pack(total: str, active: str, moe: bool, checked: bool = False) -> dict:
     return {
         "total": total,
         "active": active,
         "moe": moe,
         "label": f"{total} total · {active} active",
+        "checked": checked,
     }
 
 
@@ -97,6 +103,15 @@ def parse_params(*sources: object) -> dict:
     Known MoE cards override Ollama's dense ``parameter_size`` (e.g. gemma4:26b
     is 26B total / 3.8B active, not a dense 26B).
     """
+    try:
+        from haval_engine.models.param_cards import cached_params
+
+        cached = cached_params(*sources)
+        if cached:
+            return cached
+    except Exception:
+        pass
+
     known = lookup_known(*sources)
     if known:
         return known
@@ -114,6 +129,13 @@ def parse_params(*sources: object) -> dict:
     if mx:
         experts = float(mx.group("experts"))
         active_n = float(mx.group("active"))
+        if experts <= 8:
+            return _pack(format_b(experts * active_n), format_b(active_n), True)
+        dense = _DENSE.search(blob)
+        if dense:
+            total_n = float(dense.group("n"))
+            if total_n != active_n:
+                return _pack(format_b(total_n), format_b(active_n), True)
         return _pack(format_b(experts * active_n), format_b(active_n), True)
 
     for source in sources:

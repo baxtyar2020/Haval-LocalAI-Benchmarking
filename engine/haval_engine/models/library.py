@@ -57,6 +57,62 @@ def _fmt_size(n: int | None) -> str:
         return f"{n / 1024**2:.0f} MB"
 
 
+OPEN_DOWNLOAD_STATES = ("queued", "downloading", "verifying", "paused", "failed")
+
+_tags_lock = threading.Lock()
+_tags_cache: tuple[float, tuple[bool, dict]] | None = None
+_TAGS_TTL_S = 1.6
+_search_lock = threading.Lock()
+_search_cache: dict[str, tuple[float, list]] = {}
+_SEARCH_TTL_S = 25.0
+
+
+def _tags_cached(timeout: float = 2.2) -> tuple[bool, dict]:
+    """Reuse a fresh tags list so a busy Ollama pull cannot stall every UI poll."""
+    global _tags_cache
+    now = time.time()
+    with _tags_lock:
+        if _tags_cache and now - _tags_cache[0] < _TAGS_TTL_S:
+            return _tags_cache[1]
+    ok, payload = ollama.tags(timeout=timeout)
+    with _tags_lock:
+        if ok and isinstance(payload, dict):
+            _tags_cache = (now, (ok, payload))
+            return ok, payload
+        if _tags_cache:
+            return _tags_cache[1]
+    return ok, payload if isinstance(payload, dict) else {"error": payload}
+
+
+def _search_cached(query: str) -> list:
+    key = query.strip().lower()
+    if not key:
+        return []
+    now = time.time()
+    with _search_lock:
+        hit = _search_cache.get(key)
+        if hit and now - hit[0] < _SEARCH_TTL_S:
+            return hit[1]
+    rows = registry_search(query)
+    with _search_lock:
+        _search_cache[key] = (now, rows)
+    return rows
+
+
+def _job_open(download: object) -> bool:
+    return isinstance(download, dict) and download.get("state") in OPEN_DOWNLOAD_STATES
+
+
+def _with_open_jobs(rows: list[dict], all_rows: list[dict]) -> list[dict]:
+    seen = {str(r.get("name") or r.get("id") or "") for r in rows}
+    pinned = [
+        r
+        for r in all_rows
+        if _job_open(r.get("download")) and str(r.get("name") or r.get("id") or "") not in seen
+    ]
+    return pinned + rows if pinned else rows
+
+
 def _params_size_sort_key(row: dict) -> tuple:
     total = total_b_value(row.get("params_total"))
     name = str(row.get("display_name") or row.get("name") or "").lower()
@@ -97,6 +153,10 @@ class ModelLibrary:
             self.order.append(job_id)
             _log(f"queued {name}")
             return dict(job)
+
+    def jobs_public(self) -> list[dict]:
+        with self._lock:
+            return [dict(j) for j in self.jobs.values() if not is_hidden_probe_model(j.get("name"))]
 
     def cancel(self, job_id: str) -> dict | None:
         with self._lock:
@@ -173,6 +233,9 @@ class ModelLibrary:
             job["stage"] = "Verifying"
             job["pct"] = 99
         validation = self._validate(name)
+        with _tags_lock:
+            global _tags_cache
+            _tags_cache = None
         with self._lock:
             job = self.jobs[job_id]
             job["validation"] = validation
@@ -214,7 +277,7 @@ class ModelLibrary:
         return {"class": "not_verified", "detail": "Installed but not load-tested (model is large)."}
 
     def snapshot(self, *, filter_name: str = "Installed", query: str = "") -> dict:
-        ok, payload = ollama.tags(timeout=6)
+        ok, payload = _tags_cached()
         installed = [
             m
             for m in (payload.get("models") or [])
@@ -228,6 +291,15 @@ class ModelLibrary:
         jobs = [j for j in self.jobs.values() if not is_hidden_probe_model(j.get("name"))]
         hw = hardware_snapshot()
         items = self._rows(installed, catalog, jobs, selected, filter_name, query)
+        try:
+            from haval_engine.models.param_cards import request_confirm
+
+            request_confirm(
+                [str(m.get("name") or "") for m in installed]
+                + [str(j.get("name") or "") for j in jobs]
+            )
+        except Exception:
+            pass
         disk_free = hw.get("disk_free_gb")
         disk_total = hw.get("disk_total_gb")
         return {
@@ -329,6 +401,7 @@ class ModelLibrary:
             row["params_active"] = parsed["active"]
             row["params_moe"] = parsed["moe"]
             row["params_label"] = parsed["label"]
+            row["params_checked"] = bool(parsed.get("checked"))
             row["quant"] = precision_of(
                 name=str(row.get("name") or ""),
                 tag=str(row.get("tag") or ""),
@@ -339,8 +412,10 @@ class ModelLibrary:
         if filter_name == "Preferred":
             rows = [r for r in rows if r.get("preferred")]
             rows.sort(key=_params_size_sort_key)
+        elif filter_name == "Downloading":
+            rows = [r for r in rows if _job_open(r.get("download"))]
         elif filter_name == "Search Ollama":
-            hits = registry_search(query) if q else []
+            hits = _search_cached(query) if q else []
             extra = []
             for hit in hits:
                 name = str(hit.get("name") or "")
@@ -371,6 +446,7 @@ class ModelLibrary:
                         "params_total": hit.get("params_total") or parsed["total"],
                         "params_active": hit.get("params_active") or parsed["active"],
                         "params_moe": hit.get("params_moe") if "params_moe" in hit else parsed["moe"],
+                        "params_checked": bool(parsed.get("checked")),
                         "params_label": hit.get("params_label") or parsed["label"],
                         "pull_command": hit.get("pull_command") or f"ollama pull {name}",
                         "fit": estimate_fit(None),
@@ -381,6 +457,8 @@ class ModelLibrary:
         else:
             rows = [r for r in rows if r.get("installed")]
             rows.sort(key=_params_size_sort_key)
+        if filter_name != "Downloading":
+            rows = _with_open_jobs(rows, list(by_name.values()))
         return [r for r in rows if not is_hidden_probe_model(r.get("name"))]
 
     def set_selected(self, name: str, selected: bool) -> list[str]:
@@ -394,11 +472,14 @@ class ModelLibrary:
         return current
 
     def remove(self, name: str) -> tuple[bool, str]:
+        global _tags_cache
         ok, msg = delete_model(name)
         if ok:
             current = set(load_settings().get("selected_models") or [])
             current.discard(name)
             save_settings({"selected_models": sorted(current)})
+            with _tags_lock:
+                _tags_cache = None
         return ok, msg
 
 

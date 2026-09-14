@@ -131,7 +131,7 @@ export function BenchmarkScreen({ snapshot, showLog, canStart, startHint, onStar
           <div className="progress" style={{ flex: 1, height: 12 }}>
             <span style={{ width: `${pct}%` }} />
           </div>
-          <div style={{ fontFamily: "var(--font-serif)", fontSize: 32, fontWeight: 600, lineHeight: 1, width: 78, textAlign: "right" }}>
+          <div className="bench-pct">
             {pct}%
           </div>
         </div>

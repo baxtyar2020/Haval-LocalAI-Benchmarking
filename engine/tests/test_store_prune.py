@@ -1,5 +1,4 @@
 import shutil
-from pathlib import Path
 
 
 def test_list_runs_drops_deleted_folders(tmp_path, monkeypatch):
@@ -25,6 +24,41 @@ def test_running_run_is_kept_without_artifacts(tmp_path, monkeypatch):
     store = RunStore()
     rid = store.create_run(["stub:model"])
     shutil.rmtree(runs_dir() / rid)
+    listed = store.list_runs()
+    assert any(r["id"] == rid for r in listed)
+
+
+def test_stopped_run_with_attempts_is_kept_without_artifacts(tmp_path, monkeypatch):
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    from haval_engine.data.store import RunStore, runs_dir
+
+    store = RunStore()
+    rid = store.create_run(["stub:model"])
+    store.add_attempt(
+        {
+            "run_id": rid,
+            "model": "stub:model",
+            "scenario_id": "C-EO-L",
+            "attempt": 1,
+            "ok": True,
+            "ttft_s": 1,
+            "total_s": 8,
+            "tok_s": 40,
+            "load_s": None,
+            "prompt_tokens": 10,
+            "output_tokens": 20,
+            "q": 80,
+            "e": None,
+            "hard_fail": False,
+            "error": None,
+            "output": "ok",
+            "grade": {},
+        }
+    )
+    store.set_status(rid, "stopped", {"partial": True})
+    folder = runs_dir() / rid
+    if folder.is_dir():
+        shutil.rmtree(folder)
     listed = store.list_runs()
     assert any(r["id"] == rid for r in listed)
 

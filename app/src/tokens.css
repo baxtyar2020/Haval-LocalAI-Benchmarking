@@ -1,18 +1,42 @@
 :root {
-  --canvas: #f6f1e9;
-  --surface: #fbf7ef;
-  --surface-2: #fffdf8;
-  --border: #e6dfd3;
-  --ink: #1a1a1a;
-  --ink-soft: #4a4540;
-  --ink-faint: #8a857d;
   --accent: #db4f1b;
-  --accent-soft: #f4dcd0;
-  --on-accent: #f6f1e9;
-  --accent-text: #a83b15;
-  --accent-hover: #c54518;
-  --ok: #287653;
-  --ok-bg: #ddede5;
+  --accent-600: #c04010;
+  --accent-700: #97310c;
+  --accent-100: #ffe9e0;
+  --accent-200: #ffd3c4;
+  --accent-300: #ffb096;
+  --accent-400: #f5875f;
+  --sage: #7a8a5e;
+  --sage-100: #f0fae1;
+  --sage-600: #728157;
+  --sage-800: #3d472b;
+  --bg: #fbf0de;
+  --surface: #f1e6d2;
+  --text: #201e1d;
+  --muted: #645c50;
+  --divider: rgba(32, 30, 29, 0.16);
+  --font-brand: "Caprasimo", Georgia, serif;
+  --font-heading: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --radius-card: 26px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.14);
+  --shadow-md: 0 3px 10px rgba(46, 43, 37, 0.16);
+  --shadow-lg: 0 12px 32px rgba(46, 43, 37, 0.22);
+
+  /* Legacy aliases used across existing screens */
+  --canvas: var(--bg);
+  --surface-2: #f9f4ed;
+  --border: var(--divider);
+  --ink: var(--text);
+  --ink-soft: var(--muted);
+  --ink-faint: #82796a;
+  --accent-soft: var(--accent-100);
+  --on-accent: #fff;
+  --accent-text: var(--accent-700);
+  --accent-hover: var(--accent-600);
+  --ok: var(--sage);
+  --ok-bg: var(--sage-100);
   --warn: #a76000;
   --warn-bg: #f7e8c8;
   --err: #b42318;
@@ -21,16 +45,145 @@
   --info-bg: #e1eaf0;
   --neu: #625d57;
   --neu-bg: #ece6dd;
-  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 6px 18px -8px rgba(26, 26, 26, 0.08);
-  --shadow-elevated: 0 1px 2px rgba(26, 26, 26, 0.04), 0 8px 24px -10px rgba(26, 26, 26, 0.12);
-  --radius-card: 14px;
-  --radius-elevated: 16px;
-  --radius-pill: 999px;
-  --font-sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-  --font-serif: "Fraunces", Georgia, serif;
+  --shadow-card: var(--shadow-sm);
+  --shadow-elevated: var(--shadow-md);
+  --radius-elevated: 28px;
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-body);
   --font-mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
   --ease: 160ms ease;
   --content-max: 1180px;
+}
+
+/* Haval default — same tokens as :root. Always applied via data-color-theme so
+   switching back from Classic/Dawn/Flexoki fully replaces those palettes. */
+html[data-color-theme="current"] {
+  --accent: #db4f1b;
+  --accent-600: #c04010;
+  --accent-700: #97310c;
+  --accent-100: #ffe9e0;
+  --accent-200: #ffd3c4;
+  --accent-300: #ffb096;
+  --accent-400: #f5875f;
+  --sage: #7a8a5e;
+  --sage-100: #f0fae1;
+  --sage-600: #728157;
+  --sage-800: #3d472b;
+  --bg: #fbf0de;
+  --surface: #f1e6d2;
+  --text: #201e1d;
+  --muted: #645c50;
+  --divider: rgba(32, 30, 29, 0.16);
+  --canvas: var(--bg);
+  --surface-2: #f9f4ed;
+  --border: var(--divider);
+  --ink: var(--text);
+  --ink-soft: var(--muted);
+  --ink-faint: #82796a;
+  --accent-soft: var(--accent-100);
+  --on-accent: #fff;
+  --accent-text: var(--accent-700);
+  --accent-hover: var(--accent-600);
+  --ok: var(--sage);
+  --ok-bg: var(--sage-100);
+  --warn: #a76000;
+  --warn-bg: #f7e8c8;
+  --err: #b42318;
+  --err-bg: #f8dfdc;
+  --info: #456a87;
+  --info-bg: #e1eaf0;
+  --neu: #625d57;
+  --neu-bg: #ece6dd;
+  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.14);
+  --shadow-md: 0 3px 10px rgba(46, 43, 37, 0.16);
+  --shadow-lg: 0 12px 32px rgba(46, 43, 37, 0.22);
+}
+
+/* Optional Classic palette (previous app colors). Default theme stays in :root above. */
+html[data-color-theme="classic"] {
+  --accent: #db4f1b;
+  --accent-600: #c54518;
+  --accent-700: #a83b15;
+  --accent-100: #f4dcd0;
+  --accent-200: #f0cbb8;
+  --accent-300: #e8a888;
+  --accent-400: #d97a4a;
+  --sage: #287653;
+  --sage-100: #ddede5;
+  --sage-600: #287653;
+  --sage-800: #1a4d36;
+  --bg: #f6f1e9;
+  --surface: #fbf7ef;
+  --text: #1a1a1a;
+  --muted: #4a4540;
+  --divider: #e6dfd3;
+  --surface-2: #fffdf8;
+  --ink-faint: #8a857d;
+  --shadow-sm: 0 1px 2px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 1px 2px rgba(26, 26, 26, 0.04), 0 6px 18px -8px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 1px 2px rgba(26, 26, 26, 0.04), 0 8px 24px -10px rgba(26, 26, 26, 0.12);
+}
+
+/* Rosé Pine Dawn — https://rosepinetheme.com/palette/ */
+html[data-color-theme="dawn"] {
+  --accent: #b4637a;
+  --accent-600: #9d5570;
+  --accent-700: #7a4458;
+  --accent-100: #f6e4e0;
+  --accent-200: #f0d4d0;
+  --accent-300: #e4b0ae;
+  --accent-400: #d7827e;
+  --sage: #286983;
+  --sage-100: #e5e6e2;
+  --sage-600: #286983;
+  --sage-800: #1d4d62;
+  --bg: #faf4ed;
+  --surface: #fffaf3;
+  --text: #575279;
+  --muted: #797593;
+  --divider: #dfdad9;
+  --surface-2: #f4ede8;
+  --ink-faint: #9893a5;
+  --warn: #ea9d34;
+  --warn-bg: #fbead8;
+  --err: #b4637a;
+  --err-bg: #f6e4e0;
+  --info: #56949f;
+  --info-bg: #eaeae5;
+  --shadow-sm: 0 1px 2px rgba(87, 82, 121, 0.08);
+  --shadow-md: 0 3px 10px rgba(87, 82, 121, 0.1);
+  --shadow-lg: 0 12px 32px rgba(87, 82, 121, 0.14);
+}
+
+/* Flexoki Light — https://stephango.com/flexoki */
+html[data-color-theme="flexoki"] {
+  --accent: #bc5215;
+  --accent-600: #9d4310;
+  --accent-700: #71320d;
+  --accent-100: #ffe7ce;
+  --accent-200: #fed3af;
+  --accent-300: #fcc192;
+  --accent-400: #da702c;
+  --sage: #66800b;
+  --sage-100: #edeecf;
+  --sage-600: #66800b;
+  --sage-800: #3d4c07;
+  --bg: #fffcf0;
+  --surface: #f2f0e5;
+  --text: #100f0f;
+  --muted: #6f6e69;
+  --divider: #e6e4d9;
+  --surface-2: #fffcf0;
+  --ink-faint: #b7b5ac;
+  --warn: #ad8301;
+  --warn-bg: #f2e8c8;
+  --err: #af3029;
+  --err-bg: #f4d8d4;
+  --info: #205ea6;
+  --info-bg: #dce8f4;
+  --shadow-sm: 0 1px 2px rgba(16, 15, 15, 0.08);
+  --shadow-md: 0 3px 10px rgba(16, 15, 15, 0.1);
+  --shadow-lg: 0 12px 32px rgba(16, 15, 15, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {
